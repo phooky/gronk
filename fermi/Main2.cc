@@ -47,6 +47,8 @@ const unsigned int JS_LOW_VAL = 405;
 const unsigned int JS_HIGH_VAL = 615;
 const unsigned int JS_DEAD_ZONE = 10;
 const unsigned int JS_MAX_ZONE = 10;
+unsigned int js_positions[2] = { 0xffff, 0xffff };
+unsigned char js_chan = 0; // current channel being read
 
 void init_analog() {
   // Clear MUX5 in ADCSRB.
@@ -56,6 +58,18 @@ void init_analog() {
   // ADCSRA: ADPS2-0 = 111b
   // ADCSRA: ADEN = 1b
   ADCSRA = (1<<ADEN) | (1<<ADPS2 ) | (1<<ADPS1) | (1<<ADPS0);
+}
+
+void start_analog_conversion(unsigned char channel) {
+  // Write channel to ADMUX.
+  // ADMUX: REFS1/0 = b01 (AVCC VREF)
+  // ADMUX: ADLAR = 0 (ADCH/L are right-justified)
+  // ADMUX: MUX4-0 = ADCX channel (ADC0-ADC7)
+  ADMUX = (1 << REFS0) | channel;
+  // ADSC is set to start conversion. This bit is cleared when the
+  // conversion is done.
+  // ADIE is set to trigger completion interrupt.
+  ADCSRA |= 1 << ADIE | 1 << ADSC;
 }
 
 // PF0-2
@@ -101,6 +115,7 @@ int main() {
   SoftI2cManager::getI2cManager().init();
   init_timers();
   init_analog();
+  start_analog_conversion(js_chan);
   sei();
   RGB_LED::init();
   RGB_LED::setCustomColor(0x10,0x88,0x10);
@@ -120,17 +135,23 @@ int main() {
   while (1) {
     wdt_reset();
     _delay_ms(200);
-    unsigned int a = read_analog(0);
-    unsigned int b = read_analog(1);
     lcd.clear();
     lcd.writeString("Port A:");
-    lcd.writeInt(a);
+    lcd.writeInt(js_positions[0]);
     lcd.setCursor(0,1);
     lcd.writeString("Port B:");
-    lcd.writeInt(b);
+    lcd.writeInt(js_positions[1]);
   }
   return 0;
 }
 
 ISR(TIMER2_COMPA_vect) {
+}
+
+ISR(ADC_vect) {
+  unsigned int result = ADCL;
+  result |= (ADCH & 0x03) << 8;
+  js_positions[js_chan] = result;
+  js_chan ^= 0x01;
+  start_analog_conversion(js_chan);
 }
