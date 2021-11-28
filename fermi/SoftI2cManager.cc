@@ -27,15 +27,10 @@ SoftI2cManager SoftI2cManager::i2cManager;
 
 // constructor
 SoftI2cManager::SoftI2cManager():
+  sdaPins{ X_POT_PIN, Y_POT_PIN, Z_POT_PIN, A_POT_PIN, B_POT_PIN },
   sclPin(POTS_SCL),
   numPins(STEPPER_COUNT)
 {
-    sdaPins[0] = X_POT_PIN;
-    sdaPins[1] = Y_POT_PIN;
-    sdaPins[2] = Z_POT_PIN;
-    sdaPins[3] = A_POT_PIN;
-    sdaPins[4] = B_POT_PIN;
-    
 }
 
 

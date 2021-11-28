@@ -24,17 +24,16 @@
 // can't assume that its in that state when a sketch starts (and the
 // LiquidCrystal constructor is called).
 
-LiquidCrystalSerial::LiquidCrystalSerial(Pin strobe, Pin data, Pin CLK) 
+LiquidCrystalSerial::LiquidCrystalSerial(Pin strobe, Pin data, Pin clk) :
+  _strobe_pin(strobe),
+  _data_pin(data),
+  _clk_pin(clk)
 {
-  init(strobe, data, CLK);
+  init();
 }
 
-void LiquidCrystalSerial::init(Pin strobe, Pin data, Pin clk)
+void LiquidCrystalSerial::init()
 {
-  _strobe_pin = strobe;
-  _data_pin = data;
-  _clk_pin = clk;
-  
   _strobe_pin.setDirection(true);
   _data_pin.setDirection(true);
   _clk_pin.setDirection(true);

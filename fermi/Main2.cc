@@ -93,13 +93,20 @@ unsigned int read_analog(unsigned char channel) {
 }
 
 void init_timers() {
+  // TIMER 2: microseconds, LED flasher, etc.
   // Reset and configure timer 2, the microsecond timer, advance_timer and debug LED flasher timer.
   TCCR2A = 0x02; //CTC  //0x00;  
   TCCR2B = 0x04; //prescaler at 1/64  //0x0A; /// prescaler at 1/8
   OCR2A = 25; //Generate interrupts 16MHz / 64 / 25 = 10KHz  //INTERVAL_IN_MICROSECONDS;
-  // TODO: update PWM settings to make overflowtime adjustable if desired : currently interupting on overflow
   OCR2B = 0;
-  TIMSK2 |= 0x02; // turn on OCR2A match interrupt
+  TIMSK2 |= 1 << OCIE2A; // turn on OCR2A match interrupt
+
+  // TIMER 5: stepper interupts.
+  TCCR5A = 0x00;
+  TCCR5B = 0x0A; // no prescaling
+  TCCR5C = 0x00;
+  OCR5A = 0x2000; //INTERVAL_IN_MICROSECONDS * 16;
+  TIMSK5 |= 1 << OCIE5A; // turn on OCR5A match interrupt
 }
 
 int main() {
@@ -148,6 +155,10 @@ int main() {
 ISR(TIMER2_COMPA_vect) {
 }
 
+ISR(TIMER5_COMPA_vect) {
+  // Handle stepper interrupt.
+}
+
 ISR(ADC_vect) {
   unsigned int result = ADCL;
   result |= (ADCH & 0x03) << 8;
@@ -155,3 +166,4 @@ ISR(ADC_vect) {
   js_chan ^= 0x01;
   start_analog_conversion(js_chan);
 }
+

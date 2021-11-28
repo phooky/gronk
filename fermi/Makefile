@@ -18,11 +18,11 @@ OBJS=Main2.o Pin.o AvrPort.o SoftI2cManager.o TWI.o RGB_LED.o \
 %.o: %.cc
 	$(CPP) -c -o $@ $(CFLAGS) $<
 
-$(TARGET_ELF): $(OBJS)
-	/usr/bin/avr-gcc -mmcu=$(CPU) -Os -Wl,-Map,$(TARGET).map -Wl,--gc-sections -o $@ $^ -lm
-
 $(TARGET_HEX): $(TARGET_ELF)
 	avr-objcopy -O ihex -R .eeprom $< $@
+
+$(TARGET_ELF): $(OBJS)
+	/usr/bin/avr-gcc -mmcu=$(CPU) -Os -Wl,-Map,$(TARGET).map -Wl,--gc-sections -o $@ $^ -lm
 
 upload: $(TARGET_HEX)
 	avrdude -F -p m1280 -P $(PORT) -c stk500v1 -b 57600 -U flash:w:$(TARGET_HEX)

@@ -96,31 +96,31 @@
 
 
 //Stepper Ports
-#define X_STEPPER_STEP          STEPPER_PORT(D,6)   //active rising edge
-#define X_STEPPER_DIR           STEPPER_PORT(D,7)   //forward on high
-#define X_STEPPER_ENABLE        STEPPER_PORT(D,4)   //active low
-#define X_STEPPER_MIN           STEPPER_PORT(J,2)   //active high
-#define X_STEPPER_MAX           STEPPER_PORT(C,7)   //active high
+#define X_STEPPER_STEP          Pin(PortD,6)   //active rising edge
+#define X_STEPPER_DIR           Pin(PortD,7)   //forward on high
+#define X_STEPPER_ENABLE        Pin(PortD,4)   //active low
+#define X_STEPPER_MIN           Pin(PortJ,2)   //active high
+#define X_STEPPER_MAX           Pin(PortC,7)   //active high
 
-#define Y_STEPPER_STEP          STEPPER_PORT(L,5)   //active rising edge
-#define Y_STEPPER_DIR           STEPPER_PORT(L,7)   //forward on high
-#define Y_STEPPER_ENABLE        STEPPER_PORT(L,4)   //active low
-#define Y_STEPPER_MIN           STEPPER_PORT(J,1)   //active high
-#define Y_STEPPER_MAX           STEPPER_PORT(C,6)   //active high
+#define Y_STEPPER_STEP          Pin(PortL,5)   //active rising edge
+#define Y_STEPPER_DIR           Pin(PortL,7)   //forward on high
+#define Y_STEPPER_ENABLE        Pin(PortL,4)   //active low
+#define Y_STEPPER_MIN           Pin(PortJ,1)   //active high
+#define Y_STEPPER_MAX           Pin(PortC,6)   //active high
 
-#define Z_STEPPER_STEP          STEPPER_PORT(L,1)   //active rising edge
-#define Z_STEPPER_DIR           STEPPER_PORT(L,2)   //forward on high
-#define Z_STEPPER_ENABLE        STEPPER_PORT(L,0)   //active low
-#define Z_STEPPER_MIN           STEPPER_PORT(C,5)   //active high
-#define Z_STEPPER_MAX           STEPPER_PORT(J,0)   //active high
+#define Z_STEPPER_STEP          Pin(PortL,1)   //active rising edge
+#define Z_STEPPER_DIR           Pin(PortL,2)   //forward on high
+#define Z_STEPPER_ENABLE        Pin(PortL,0)   //active low
+#define Z_STEPPER_MIN           Pin(PortC,5)   //active high
+#define Z_STEPPER_MAX           Pin(PortJ,0)   //active high
 
-#define A_STEPPER_STEP          STEPPER_PORT(A,3)   //active rising edge
-#define A_STEPPER_DIR           STEPPER_PORT(A,2)   //forward on high
-#define A_STEPPER_ENABLE        STEPPER_PORT(A,5)   //active low
+#define A_STEPPER_STEP          Pin(PortA,3)   //active rising edge
+#define A_STEPPER_DIR           Pin(PortA,2)   //forward on high
+#define A_STEPPER_ENABLE        Pin(PortA,5)   //active low
 
-#define B_STEPPER_STEP          STEPPER_PORT(A,0)   //active rising edge
-#define B_STEPPER_DIR           STEPPER_PORT(K,7)   //forward on high
-#define B_STEPPER_ENABLE        STEPPER_PORT(A,1)   //active low
+#define B_STEPPER_STEP          Pin(PortA,0)   //active rising edge
+#define B_STEPPER_DIR           Pin(PortK,7)   //forward on high
+#define B_STEPPER_ENABLE        Pin(PortA,1)   //active low
 
 // X stepper potentiometer pin
 #define X_POT_PIN	  Pin(PortD,5)

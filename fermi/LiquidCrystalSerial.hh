@@ -50,9 +50,9 @@
 
 class LiquidCrystalSerial {
 public:
-  LiquidCrystalSerial(Pin strobe, Pin data, Pin CLK);
+  LiquidCrystalSerial(Pin strobe, Pin data, Pin clk);
 
-  void init(Pin strobe, Pin data, Pin CLK);
+  void init();
     
   void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
 
