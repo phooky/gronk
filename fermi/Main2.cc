@@ -118,8 +118,9 @@ int main() {
   INTERFACE_LED_ONE.setValue(true);
   INTERFACE_LED_TWO.setValue(true);
 
-  reset(true);
   SoftI2cManager::getI2cManager().init();
+
+  reset(true);
   init_timers();
   init_analog();
   start_analog_conversion(js_chan);

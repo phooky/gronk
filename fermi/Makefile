@@ -15,7 +15,8 @@ REG_OBJS=AvrPort.o ButtonArray.o RGB_LED.o Timeout.o Pin.o TWI.o \
 	Main.o Motherboard.o
 
 OBJS=Main2.o Pin.o AvrPort.o SoftI2cManager.o TWI.o RGB_LED.o \
-	LiquidCrystalSerial.o ButtonArray.o Steppers.o
+	LiquidCrystalSerial.o ButtonArray.o Steppers.o \
+	DigiPots.o
 
 %.o: %.cc
 	$(CPP) -c -o $@ $(CFLAGS) $<

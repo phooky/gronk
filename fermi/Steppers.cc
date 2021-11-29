@@ -19,6 +19,7 @@
 
 #define __STDC_LIMIT_MACROS
 #include "Steppers.hh"
+#include "SoftI2cManager.hh"
 #include <stdint.h>
 
 #define A_STEPPER_MIN NullPin
@@ -26,12 +27,16 @@
 #define B_STEPPER_MIN NullPin
 #define B_STEPPER_MAX NullPin
 
+///assume max vref is 1.95V  (allowable vref for max current rating of stepper is 1.814)
+#define DIGI_POT_MAX	118
+
 #define AXIS_PIN_SET(axis) { \
   axis ## _STEPPER_STEP,     \
     axis ## _STEPPER_DIR,    \
     axis ## _STEPPER_ENABLE, \
     axis ## _STEPPER_MIN,    \
-    axis ## _STEPPER_MAX }
+    axis ## _STEPPER_MAX,    \
+    axis ## _POT_PIN }
 
 namespace steppers {
 
@@ -49,6 +54,7 @@ namespace steppers {
     Pin en;
     Pin min;
     Pin max;
+    Pin pot;
   } StepPins;
 
   const StepPins stepPins[STEPPER_COUNT] = {
@@ -59,6 +65,8 @@ namespace steppers {
     AXIS_PIN_SET(B) };
 
   void init_pots() {
+    // XYAB settings should be around 118
+    // Z setting should be around 40
   }
   /*
   /// Set up the digipot pins 
@@ -109,8 +117,16 @@ namespace steppers {
     init_pots();
     init_pins();
     reset_axes();
-    // init pots
     
+  }
+
+  void setPotValue(const Pin& pin, uint8_t val)
+  {
+    SoftI2cManager i2cPots = SoftI2cManager::getI2cManager();
+    i2cPots.start(0b01011110 | I2C_WRITE, pin);
+    if (val > DIGI_POT_MAX) val = DIGI_POT_MAX;
+    i2cPots.write(val, pin);
+    i2cPots.stop(); 
   }
 
   void enable(uint8_t which, bool enable) {
