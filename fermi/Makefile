@@ -1,6 +1,8 @@
 
 CPU=atmega1280
-CFLAGS=-DF_CPU=16000000L -DREVG -DMODEL_REPLICATOR2 -DSPECIFIC_REP2 -mmcu=$(CPU) -g -Os -Wall -Winline -fno-exceptions -ffunction-sections -fdata-sections
+CFLAGS=-DF_CPU=16000000L -DREVG -DMODEL_REPLICATOR2 -DSPECIFIC_REP2 \
+-mmcu=$(CPU) -g -Os -Wall -Winline -fno-exceptions -ffunction-sections \
+-fdata-sections -std=c++11
 CPP=/usr/bin/avr-g++
 
 PORT ?= /dev/ttyACM0
@@ -13,7 +15,7 @@ REG_OBJS=AvrPort.o ButtonArray.o RGB_LED.o Timeout.o Pin.o TWI.o \
 	Main.o Motherboard.o
 
 OBJS=Main2.o Pin.o AvrPort.o SoftI2cManager.o TWI.o RGB_LED.o \
-	LiquidCrystalSerial.o ButtonArray.o
+	LiquidCrystalSerial.o ButtonArray.o Steppers.o
 
 %.o: %.cc
 	$(CPP) -c -o $@ $(CFLAGS) $<

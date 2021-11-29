@@ -17,274 +17,102 @@
  * Modifications for Jetty Marlin compatability, authored by Dan Newman and Jetty.
  */
 
-#ifndef SIMULATOR
-
 #define __STDC_LIMIT_MACROS
 #include "Steppers.hh"
-#include "StepperAxis.hh"
 #include <stdint.h>
-#include <util/delay.h>
-#include "Eeprom.hh"
-#include "EepromMap.hh"
-#include "stdio.h"
 
-#else
+#define A_STEPPER_MIN NullPin
+#define A_STEPPER_MAX NullPin
+#define B_STEPPER_MIN NullPin
+#define B_STEPPER_MAX NullPin
 
-#include "Steppers.hh"
-#include "StepperAxis.hh"
-#include <stdint.h>
-#include "Eeprom.hh"
-#include "EepromMap.hh"
-
-#ifdef ATOMIC_BLOCK
-#undef ATOMIC_BLOCK
-#endif
-#define ATOMIC_BLOCK(x)
-
-#ifdef labs
-#undef labs
-#endif
-#define labs(x) abs(x)
-
-#define st_init()
-#define st_interrupt() false
-#define st_extruder_interrupt()
-#define quickStop()
-#define DEBUG_TIMER_TCTIMER_USI 0
-#define DEBUG_TIMER_START
-#define DEBUG_TIMER_FINISH
-
-#endif
-
-#ifdef DEBUG_ONSCREEN
-	volatile float debug_onscreen1 = 0.0, debug_onscreen2 = 0.0;
-#endif
+#define AXIS_PIN_SET(axis) { \
+  axis ## _STEPPER_STEP,     \
+    axis ## _STEPPER_DIR,    \
+    axis ## _STEPPER_ENABLE, \
+    axis ## _STEPPER_MIN,    \
+    axis ## _STEPPER_MAX }
 
 namespace steppers {
 
-#ifndef SIMULATOR
+  typedef struct {
+    int32_t position;
+    int16_t velocity;
+    int16_t acceleration;
+  } StepAxisInfo;
 
-/// Set up the digipot pins 
-DigiPots digi_pots[STEPPER_COUNT] = {
-        DigiPots(X_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
-        DigiPots(Y_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
-        DigiPots(Z_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
-        DigiPots(A_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
-        DigiPots(B_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
+  StepAxisInfo axis[MAX_STEPPERS];
+
+  typedef struct {
+    Pin step;
+    Pin dir;
+    Pin en;
+    Pin min;
+    Pin max;
+  } StepPins;
+
+  const StepPins stepPins[STEPPER_COUNT] = {
+    AXIS_PIN_SET(X),
+    AXIS_PIN_SET(Y),
+    AXIS_PIN_SET(Z),
+    AXIS_PIN_SET(A),
+    AXIS_PIN_SET(B) };
+
+  /*
+  /// Set up the digipot pins 
+  DigiPots digi_pots[STEPPER_COUNT] = {
+    DigiPots(X_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
+    DigiPots(Y_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
+    DigiPots(Z_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
+    DigiPots(A_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
+    DigiPots(B_POT_PIN, eeprom_offsets::DIGI_POT_SETTINGS),
+  };
+
+  void initPots(){
+  // set digi pots to stored default values
+  for ( int i = 0; i < STEPPER_COUNT; i++ ) {
+  digi_pots[i].init(i);
+  }
+  }
+  */
+
+  /// This is the bit of the position that is copied to the
+  /// step line. All the bits to the left encode the actual
+  /// position; those to the right are below the resolution
+  /// of the physical system.
+  const uint8_t STEP_BIT = 16;
+
+  void reset_axes() {
+    for (StepAxisInfo& a : axis) {
+      a.position = 0;
+      a.velocity = 0;
+      a.acceleration = 0;
+    }
+  }
+
+  void init_pins() {
+    for (const StepPins& pins : stepPins) {
+      // Make sure each stepper is initialized in a disabled state.
+      // Enable is active low!!!
+      pins.en.setValue(true);
+      pins.en.setDirection(true);
+      pins.step.setValue(false);
+      pins.step.setDirection(true);
+      pins.dir.setValue(false);
+      pins.dir.setDirection(true);
+    }
+  }
+
+  void init() {
+    init_pins();
+    reset_axes();
+    // init pots
+    
+  }
+
 };
 
-#else
-
-typedef struct {
-	void (*init)(int);
-	void (*setPotValue)(uint8_t);
-} DigiPots;
-
-static void dummy_init(int i) { (void)i; }
-static void dummy_setPotValue(uint8_t v) { (void)v; }
-
-DigiPots digi_pots[STEPPER_COUNT] = {
-	{dummy_init, dummy_setPotValue},
-	{dummy_init, dummy_setPotValue},
-	{dummy_init, dummy_setPotValue},
-	{dummy_init, dummy_setPotValue},
-	{dummy_init, dummy_setPotValue}
-};
-
-#endif
-
-void initPots(){
-	// set digi pots to stored default values
-	for ( int i = 0; i < STEPPER_COUNT; i++ ) {
-		digi_pots[i].init(i);
-	}
-}
-
-volatile bool is_running;
-volatile bool is_homing;
-bool acceleration = true;
-uint8_t plannerMaxBufferSize;
-FPTYPE axis_steps_per_unit_inverse[STEPPER_COUNT];
-
-// Segments are accelerated when segmentAccelState is true; unaccelerated otherwise
-static bool segmentAccelState = true;
-
-bool holdZ = false;
-
-bool z_homing = false;
-uint8_t z_homed = 0;
-
-//Also requires DEBUG_ONSCREEN to be defined in StepperAccel.h
-//#define TIME_STEPPER_INTERRUPT
-
-#if defined(DEBUG_ONSCREEN) && defined(TIME_STEPPER_INTERRUPT)
-uint16_t debugTimer = 0;
-#endif
-
-
-bool isRunning() {
-	return is_running || is_homing;
-}
-
-
-void reset() {
-	stepperAxisInit(false);
-
-	initPots();
-
-  // these variables help us to track z stage lowering, so we can do smart cancel build behavior
-	z_homed = 0;
-	z_homing = false;
-
-	// If acceleration has not been initialized before (i.e. last time we ran we were an earlier firmware),
-	// then we initialize the acceleration eeprom settings here
-	uint8_t accelerationStatus = eeprom::getEeprom8(eeprom_offsets::ACCELERATION_SETTINGS + acceleration_eeprom_offsets::DEFAULTS_FLAG, 0xFF);
-	if (accelerationStatus !=  _BV(ACCELERATION_INIT_BIT)) {
-		eeprom::setDefaultsAcceleration();
-	}
-
-        //Get the acceleration settings
-	uint8_t accel = eeprom::getEeprom8(eeprom_offsets::ACCELERATION_SETTINGS + acceleration_eeprom_offsets::ACCELERATION_ACTIVE, 0) & 0x01;
-        acceleration = accel & 0x01;
-
-	setSegmentAccelState(acceleration);
-	deprimeEnable(true);
-
-	//Here's more documentation on the various settings / features
-	//http://wiki.ultimaker.com/Marlin_firmware_for_the_Ultimaker
-	//https://github.com/ErikZalm/Marlin/commits/Marlin_v1
-	//http://forums.reprap.org/read.php?147,94689,94689
-	//http://reprap.org/pipermail/reprap-dev/2011-May/003323.html
-	//http://www.brokentoaster.com/blog/?p=358
-
-	for ( uint8_t i = 0; i < STEPPER_COUNT; i ++ )
-		axis_steps_per_unit_inverse[i] = FTOFP(1.0 / stepperAxisStepsPerMM(i));
-
-	//Macros to clean things up a bit
-	#define NAC1(LOCATION) eeprom_offsets::ACCELERATION_SETTINGS + acceleration_eeprom_offsets::LOCATION
-	#define NAC2(LOCATION) eeprom_offsets::ACCELERATION2_SETTINGS + acceleration2_eeprom_offsets::LOCATION
-	#define AC1(LOCATION,INT16INDEX) NAC1(LOCATION) + sizeof(uint16_t) * INT16INDEX
-	#define AC2(LOCATION,INT16INDEX) NAC2(LOCATION) + sizeof(uint16_t) * INT16INDEX
-
-	// Set max acceleration in units/s^2 for print moves
-	// X,Y,Z,A,B maximum start speed for accelerated moves.
-	// A,B default values are good for skeinforge 40+, for older versions raise them a lot.
-	max_acceleration_units_per_sq_second[X_AXIS] = (uint32_t)eeprom::getEeprom16(AC1(MAX_ACCELERATION_AXIS,0), DEFAULT_MAX_ACCELERATION_AXIS_X);
-	max_acceleration_units_per_sq_second[Y_AXIS] = (uint32_t)eeprom::getEeprom16(AC1(MAX_ACCELERATION_AXIS,1), DEFAULT_MAX_ACCELERATION_AXIS_Y);
-	max_acceleration_units_per_sq_second[Z_AXIS] = (uint32_t)eeprom::getEeprom16(AC1(MAX_ACCELERATION_AXIS,2), DEFAULT_MAX_ACCELERATION_AXIS_Z);
-	max_acceleration_units_per_sq_second[A_AXIS] = (uint32_t)eeprom::getEeprom16(AC1(MAX_ACCELERATION_AXIS,3), DEFAULT_MAX_ACCELERATION_AXIS_A);
-	max_acceleration_units_per_sq_second[B_AXIS] = (uint32_t)eeprom::getEeprom16(AC1(MAX_ACCELERATION_AXIS,4), DEFAULT_MAX_ACCELERATION_AXIS_B);
-
-	for (uint8_t i = 0; i < STEPPER_COUNT; i ++) {
-		// Limit the max accelerations so that the calculation of block->acceleration & JKN Advance K2
-		// can be performed without overflow issues
-		if (max_acceleration_units_per_sq_second[i] > (uint32_t)((float)0xFFFFF / stepperAxisStepsPerMM(i)))
-		     max_acceleration_units_per_sq_second[i] = (uint32_t)((float)0xFFFFF / stepperAxisStepsPerMM(i));
-		axis_steps_per_sqr_second[i] = (uint32_t)((float)max_acceleration_units_per_sq_second[i] * stepperAxisStepsPerMM(i));
-		axis_accel_step_cutoff[i] = (uint32_t)0xffffffff / axis_steps_per_sqr_second[i];
-	}
-
-	//Set default acceleration for "Normal Moves (acceleration)" and "filament only moves (retraction)" in mm/sec^2
-
-	// X,Y,Z,A,B max acceleration in mm/s^2 for printing moves
-	p_acceleration = (uint32_t)eeprom::getEeprom16(NAC1(MAX_ACCELERATION_NORMAL_MOVE), DEFAULT_MAX_ACCELERATION_NORMAL_MOVE);
-	if (p_acceleration > 10000)
-	     // 10,000 limit is actually a little smaller than 0xFFFFF / 96 steps/mm
-	     p_acceleration = 10000;
-
-#ifdef DEBUG_SLOW_MOTION
-	p_acceleration = (uint32_t)20;
-#endif
-
-	// X,Y,Z,A,B max acceleration in mm/s^2 for retracts
-	p_retract_acceleration  = (uint32_t)eeprom::getEeprom16(NAC1(MAX_ACCELERATION_EXTRUDER_MOVE), DEFAULT_MAX_ACCELERATION_EXTRUDER_MOVE);
-	if (p_retract_acceleration > 10000)
-	     // 10,000 limit is actually a little smaller than 0xFFFFF / 96 steps/mm
-	     p_retract_acceleration = 10000;
-
-#ifdef DEBUG_SLOW_MOTION
-	p_retract_acceleration	= (uint32_t)20;
-#endif
-
-	//Number of steps when priming or deprime the extruder
-	extruder_deprime_steps[0]    = (int16_t)eeprom::getEeprom16(AC2(EXTRUDER_DEPRIME_STEPS,0), DEFAULT_EXTRUDER_DEPRIME_STEPS_A);
-	extruder_deprime_steps[1]    = (int16_t)eeprom::getEeprom16(AC2(EXTRUDER_DEPRIME_STEPS,1), DEFAULT_EXTRUDER_DEPRIME_STEPS_B);
-
-	//Maximum speed change
-	max_speed_change[X_AXIS]  = FTOFP((float)eeprom::getEeprom16(AC1(MAX_SPEED_CHANGE,0), DEFAULT_MAX_SPEED_CHANGE_X));
-	max_speed_change[Y_AXIS]  = FTOFP((float)eeprom::getEeprom16(AC1(MAX_SPEED_CHANGE,1), DEFAULT_MAX_SPEED_CHANGE_Y));
-	max_speed_change[Z_AXIS]  = FTOFP((float)eeprom::getEeprom16(AC1(MAX_SPEED_CHANGE,2), DEFAULT_MAX_SPEED_CHANGE_Z));
-	max_speed_change[A_AXIS]  = FTOFP((float)eeprom::getEeprom16(AC1(MAX_SPEED_CHANGE,3), DEFAULT_MAX_SPEED_CHANGE_A));
-	max_speed_change[B_AXIS]  = FTOFP((float)eeprom::getEeprom16(AC1(MAX_SPEED_CHANGE,4), DEFAULT_MAX_SPEED_CHANGE_B));
-
-#ifdef DEBUG_SLOW_MOTION
-	max_speed_change[X_AXIS]  = FTOFP((float)1);
-	max_speed_change[Y_AXIS]  = FTOFP((float)1);
-	max_speed_change[Z_AXIS]  = FTOFP((float)0.15);
-	max_speed_change[A_AXIS]  = FTOFP((float)1);
-	max_speed_change[B_AXIS]  = FTOFP((float)1);
-#endif
-
-#ifdef FIXED
-	smallest_max_speed_change = max_speed_change[Z_AXIS];
-	for (uint8_t i = 0; i < STEPPER_COUNT; i++) {
-		if ( max_speed_change[i] < smallest_max_speed_change )
-			smallest_max_speed_change = max_speed_change[i];
-	}
-#endif
-
-	FPTYPE advanceK         = FTOFP((float)eeprom::getEeprom32(NAC2(JKN_ADVANCE_K),  DEFAULT_JKN_ADVANCE_K)         / 100000.0);
-	FPTYPE advanceK2        = FTOFP((float)eeprom::getEeprom32(NAC2(JKN_ADVANCE_K2), DEFAULT_JKN_ADVANCE_K2)        / 100000.0);
-
-	minimumSegmentTime = FTOFP((float)ACCELERATION_MIN_SEGMENT_TIME);
-
-	// Minimum planner junction speed. Sets the default minimum speed the planner plans for at the end
-	// of the buffer and all stops. This should not be much greater than zero and should only be changed
-	// if unwanted behavior is observed on a user's machine when running at very slow speeds.
-	minimumPlannerSpeed = FTOFP((float)ACCELERATION_MIN_PLANNER_SPEED);
-
-	if ( eeprom::getEeprom8(NAC2(SLOWDOWN_FLAG), DEFAULT_SLOWDOWN_FLAG) ) {
-    // we have different slowdown limits depending on whether we're printing from sd card or USB
-		slowdown_limit = (int)ACCELERATION_SLOWDOWN_LIMIT;
-    if (!sdcard::isPlaying()) { slowdown_limit *= 2; }
-		if ( slowdown_limit > (BLOCK_BUFFER_SIZE / 2))  { slowdown_limit = BLOCK_BUFFER_SIZE / 2; }
-	}
-	else	slowdown_limit = 0;	
-
-	//Clockwise extruder
-	extrude_when_negative[0] = ACCELERATION_EXTRUDE_WHEN_NEGATIVE_A;
-	extrude_when_negative[1] = ACCELERATION_EXTRUDE_WHEN_NEGATIVE_B;
-
-	//These max feedrates limit the speed the extruder can move at when
-	//it's been advanced, primed/deprimed and depressurized
-	//It acts as an overall speed governer for the A/B axis
-	//The values are obtained via the RepG xml and are updated on connection
-	//with RepG if they're different than stored.  These values are in mm per
-	//min, we divide by 60 here to get mm / sec.
-	extruder_only_max_feedrate[0] = stepperAxis[A_AXIS].max_feedrate;
-	extruder_only_max_feedrate[1] = stepperAxis[B_AXIS].max_feedrate;
-
-#ifdef PLANNER_OFF
-	plannerMaxBufferSize = 1;
-#else
-	plannerMaxBufferSize = BLOCK_BUFFER_SIZE - 1;
-#endif
-
-	plan_init(advanceK, advanceK2, holdZ);		//Initialize planner
-	st_init();					//Initialize stepper accel
-}
-
-//public:
-void init() {
-	is_running = false;
-	is_homing = false;
-
-	stepperAxisInit(true);
-
-	initPots();
-	
-}
-
+/*
 
 void abort() {
 	//Stop the stepper subsystem and get the current position
@@ -680,3 +508,4 @@ uint8_t isZHomed(){
 
 
 }
+*/

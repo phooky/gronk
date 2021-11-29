@@ -25,7 +25,7 @@
 // initiate static i2cManager instance
 SoftI2cManager SoftI2cManager::i2cManager;
 
-// constructor
+// constructor 
 SoftI2cManager::SoftI2cManager():
   sdaPins{ X_POT_PIN, Y_POT_PIN, Z_POT_PIN, A_POT_PIN, B_POT_PIN },
   sclPin(POTS_SCL),

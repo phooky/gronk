@@ -19,6 +19,7 @@ public:
 
   void setValue(bool value) const;
   bool getValue() const;
+  bool isNull() const { return port_base == NullPort.port_base; }
 };
 
 static const Pin NullPin(NullPort, 0);
