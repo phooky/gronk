@@ -58,6 +58,8 @@ namespace steppers {
     AXIS_PIN_SET(A),
     AXIS_PIN_SET(B) };
 
+  void init_pots() {
+  }
   /*
   /// Set up the digipot pins 
   DigiPots digi_pots[STEPPER_COUNT] = {
@@ -104,11 +106,16 @@ namespace steppers {
   }
 
   void init() {
+    init_pots();
     init_pins();
     reset_axes();
     // init pots
     
   }
+
+  void enable(uint8_t which, bool enable) {
+    stepPins[which].en.setValue(!enable);
+  }    
 
 };
 
