@@ -145,7 +145,9 @@ int main() {
   reset(true);
   steppers::init();
   steppers::setPotValue(X_POT_PIN,40);
+  steppers::setPotValue(Y_POT_PIN,40);
   steppers::enable(0,true);
+  steppers::enable(1,true);
   init_timers();
   init_analog();
   start_analog_conversion(js_chan);
@@ -177,7 +179,7 @@ int main() {
     lcd.writeString("vy:");
     int v2 = vel_from_js(1);
     lcd.writeInt(v2);
-    steppers::set_velocity(0,v2);
+    steppers::set_velocity(1,v2);
     //lcd.writeInt(1 << 4);
   }
   return 0;

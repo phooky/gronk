@@ -78,7 +78,7 @@ public:
   virtual void write(uint8_t);
 
   void writeString(const char message[]);
-  void writeInt(unsigned int val);
+  void writeInt(int val);
   void writeFromPgmspace(const unsigned char message[]);
 
   void command(uint8_t);

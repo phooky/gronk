@@ -130,13 +130,8 @@ namespace steppers {
     for (int i = 0; i < 2; i++) {
       auto& a = axis[i]; const auto& p = stepPins[i];
       p.dir.setValue(!(a.velocity & (1L<<15)));
-      bool lastl = a.position & (1L<<15);
       a.position += a.velocity;
       p.step.setValue(a.position & (1L<<15));
-      bool nextl = a.position & (1L<<15);
-      if ((i == 0) && nextl  && !lastl) {
-	intdbg++;
-      }
     }
     sei();
   }

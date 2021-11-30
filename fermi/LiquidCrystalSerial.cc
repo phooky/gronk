@@ -254,13 +254,17 @@ void LiquidCrystalSerial::writeString(const char message[]) {
 	}
 }
 
-void LiquidCrystalSerial::writeInt(unsigned int val) {
+void LiquidCrystalSerial::writeInt(int val) {
   char msg[10];
   char* end = msg + 10;
   char* begin = end;
   if (val == 0) {
     write('0');
     return;
+  }
+  if (val < 0) {
+    write('-');
+    val = -val;
   }
   while (val > 0) {
     begin--;
