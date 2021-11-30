@@ -43,13 +43,32 @@ void reset(bool hard_reset) {
   }
 }
 
-const unsigned int JS_CENTER_VAL = 509;
-const unsigned int JS_LOW_VAL = 405;
-const unsigned int JS_HIGH_VAL = 615;
-const unsigned int JS_DEAD_ZONE = 10;
-const unsigned int JS_MAX_ZONE = 10;
+const int JS_CENTER_VAL = 509;
+const int JS_LOW_VAL = 405;
+const int JS_HIGH_VAL = 615;
+const int JS_DEAD_ZONE = 10;
+const int JS_MAX_ZONE = 10;
 unsigned int js_positions[2] = { 0xffff, 0xffff };
 unsigned char js_chan = 0; // current channel being read
+
+const int VEL_SCALE = 300;
+
+int16_t vel_from_js(int axis) {
+  cli();
+  int pos = js_positions[axis];
+  sei();
+  if (pos < (JS_LOW_VAL + JS_MAX_ZONE)) pos = JS_LOW_VAL;
+  if (pos > (JS_HIGH_VAL + JS_MAX_ZONE)) pos = JS_HIGH_VAL;
+  pos -= JS_CENTER_VAL;
+  if ((pos > -JS_DEAD_ZONE) && (pos < JS_DEAD_ZONE)) {
+    pos = 0;
+  } else {
+    if (pos > 0) pos -= JS_DEAD_ZONE;
+    else pos += JS_DEAD_ZONE;
+  }
+  return VEL_SCALE * pos;
+}
+  
 
 void init_analog() {
   // Clear MUX5 in ADCSRB.
@@ -106,7 +125,7 @@ void init_timers() {
   TCCR5A = 0x00;
   TCCR5B = 0x0A; // no prescaling
   TCCR5C = 0x00;
-  OCR5A = 0x2000; //INTERVAL_IN_MICROSECONDS * 16;
+  OCR5A = 0x100; //INTERVAL_IN_MICROSECONDS * 16;
   TIMSK5 |= 1 << OCIE5A; // turn on OCR5A match interrupt
 }
 
@@ -146,18 +165,19 @@ int main() {
     lcd.writeString("Hello world.");
   }
 
-  steppers::set_velocity(0,1000);
   while (1) {
     wdt_reset();
-    _delay_ms(200);
+    _delay_ms(100);
     lcd.clear();
-    lcd.writeString("Port A:");
-    lcd.writeInt(js_positions[0]);
+    lcd.writeString("vx:");
+    int v1 = vel_from_js(0);
+    lcd.writeInt(v1);
+    steppers::set_velocity(0,v1);
     lcd.setCursor(0,1);
-    lcd.writeString("Port B:");
-    lcd.writeInt(js_positions[1]);
-    lcd.setCursor(0,2);
-    lcd.writeInt(intdbg);
+    lcd.writeString("vy:");
+    int v2 = vel_from_js(1);
+    lcd.writeInt(v2);
+    steppers::set_velocity(0,v2);
     //lcd.writeInt(1 << 4);
   }
   return 0;
