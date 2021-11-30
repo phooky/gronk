@@ -43,6 +43,13 @@ void reset(bool hard_reset) {
   }
 }
 
+typedef enum {
+  SS_JOYSTICK,
+  SS_OFF,
+} SystemState;
+
+SystemState ss = SS_OFF;
+
 const int JS_CENTER_VAL = 509;
 const int JS_LOW_VAL = 405;
 const int JS_HIGH_VAL = 615;
@@ -146,8 +153,6 @@ int main() {
   steppers::init();
   steppers::setPotValue(X_POT_PIN,40);
   steppers::setPotValue(Y_POT_PIN,40);
-  steppers::enable(0,true);
-  steppers::enable(1,true);
   init_timers();
   init_analog();
   start_analog_conversion(js_chan);
@@ -170,17 +175,39 @@ int main() {
   while (1) {
     wdt_reset();
     _delay_ms(100);
-    lcd.clear();
-    lcd.writeString("vx:");
-    int v1 = vel_from_js(0);
-    lcd.writeInt(v1);
-    steppers::set_velocity(0,v1);
-    lcd.setCursor(0,1);
-    lcd.writeString("vy:");
-    int v2 = vel_from_js(1);
-    lcd.writeInt(v2);
-    steppers::set_velocity(1,v2);
-    //lcd.writeInt(1 << 4);
+    ButtonArray::scan();
+    if (ButtonArray::pressed() && CENTER) switch (ss) {
+      case SS_JOYSTICK:
+	steppers::enable(0,false);
+	steppers::enable(1,false);
+	ss = SS_OFF;
+	RGB_LED::setCustomColor(0x10,0x10,0x99);
+	break;
+      case SS_OFF:
+	steppers::enable(0,true);
+	steppers::enable(1,true);
+	ss = SS_JOYSTICK;
+	RGB_LED::setCustomColor(0x99,0x10,0x10);
+	lcd.clear();
+	lcd.writeString("Steppers off.");
+	lcd.setCursor(0,1);
+	lcd.writeString("Press center button to");
+	lcd.setCursor(0,2);
+	lcd.writeString("turn on joystick control.");
+      }
+
+    if (ss == SS_JOYSTICK) {
+      lcd.clear();
+      lcd.writeString("vx:");
+      int v1 = vel_from_js(0);
+      lcd.writeInt(v1);
+      steppers::set_velocity(0,v1);
+      lcd.setCursor(0,1);
+      lcd.writeString("vy:");
+      int v2 = vel_from_js(1);
+      lcd.writeInt(v2);
+      steppers::set_velocity(1,v2);
+    }
   }
   return 0;
 }

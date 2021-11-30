@@ -15,8 +15,11 @@ namespace ButtonArray {
         
   void init();
 
-  // Returns true if any of the button states have changed.
+  void scan();
+  
+  // Returns a set of button presses.
   uint8_t pressed();
+  
 };
 
 

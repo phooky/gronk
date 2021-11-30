@@ -10,11 +10,7 @@ TARGET=rep2plot
 TARGET_ELF=$(TARGET).elf
 TARGET_HEX=$(TARGET).hex
 
-REG_OBJS=AvrPort.o ButtonArray.o RGB_LED.o Timeout.o Pin.o TWI.o \
-	LiquidCrystalSerial.o SoftI2cManager.o Piezo.o \
-	Main.o Motherboard.o
-
-OBJS=Main2.o Pin.o SoftI2cManager.o TWI.o RGB_LED.o \
+OBJS=Main.o Pin.o SoftI2cManager.o TWI.o RGB_LED.o \
 	LiquidCrystalSerial.o ButtonArray.o Steppers.o
 
 %.o: %.cc
