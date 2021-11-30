@@ -24,17 +24,17 @@
 #include <stdint.h>
 #include <util/atomic.h>
 
-#if defined (__AVR_ATmega168__) \
-|| defined (__AVR_ATmega328__) \
-	|| defined (__AVR_ATmega644P__)
+#if defined (__AVR_ATmega168__)			\
+  || defined (__AVR_ATmega328__)		\
+  || defined (__AVR_ATmega644P__)
 
-	typedef uint8_t port_base_t;
-	#define NULL_PORT 0xff
+typedef uint8_t port_base_t;
+const port_base_t NULL_PORT = 0xff;
 
 #elif defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
 
 typedef uint16_t port_base_t;
-	#define NULL_PORT 0xffff
+const port_base_t NULL_PORT = 0xffff;
 
 #endif
 
@@ -48,61 +48,37 @@ typedef uint16_t port_base_t;
 // 2 PORTx
 // This is verified true for the 168/328/644p/1280/2560.
 
-// We support three platforms: Atmega168 (1 UART), Atmega644, and Atmega1280/2560
-#if defined (__AVR_ATmega168__)     \
-|| defined (__AVR_ATmega328__)  \
-	|| defined (__AVR_ATmega644P__) \
-	|| defined (__AVR_ATmega1280__) \
-	|| defined (__AVR_ATmega2560__)
+#if defined (__AVR_ATmega168__)		\
+  || defined (__AVR_ATmega328__)	\
+  || defined (__AVR_ATmega644P__)	\
+  || defined (__AVR_ATmega1280__)	\
+  || defined (__AVR_ATmega2560__)
 #else
-	#error UART not implemented on this processor type!
+#error Unsupported processor
 #endif
-
 
 #define PINx _SFR_MEM8(port_base+0)
 #define DDRx _SFR_MEM8(port_base+1)
 #define PORTx _SFR_MEM8(port_base+2)
 
-/// The port module represents an eight bit, digital IO port on the
-/// AVR microcontroller. This library creates static
-///
-/// Porting notes:
-/// Be sure to define all of the ports supported by your processor, and to
-/// verify that the port registers follow the same convention as the 168.
-/// \ingroup HardwareLibraries
-class AvrPort {
-private:
-	const port_base_t port_base;
-	friend class Pin;
-public:
-	AvrPort();
-	AvrPort(port_base_t port_base_in);
-	bool isNull() const;
-	void setPinDirectionOut(uint8_t pin_mask) const;
-	void setPinDirectionIn(uint8_t pin_mask_inverted) const;
-	bool getPin(uint8_t pin_mask) const;
-	void setPinOn(uint8_t pin_mask) const;
-	void setPinOff(uint8_t pin_mask_inverted) const;
-};
 
-
-#if defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-extern const AvrPort PortA;
+#if defined(__AVR_ATmega644P__) ||		\
+  defined(__AVR_ATmega1280__) ||		\
+  defined(__AVR_ATmega2560__)
+const port_base_t PortA(0x20);
 #endif // __AVR_ATmega644P__
-extern const AvrPort PortB;
-extern const AvrPort PortC;
-extern const AvrPort PortD;
+const port_base_t PortB(0x23);
+const port_base_t PortC(0x26);
+const port_base_t PortD(0x29);
 #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
-extern const AvrPort PortE;
-extern const AvrPort PortF;
-extern const AvrPort PortG;
-extern const AvrPort PortH;
-extern const AvrPort PortJ;
-extern const AvrPort PortK;
-extern const AvrPort PortL;
+const port_base_t PortE(0x2C);
+const port_base_t PortF(0x2F);
+const port_base_t PortG(0x32);
+const port_base_t PortH(0x100);
+const port_base_t PortJ(0x103);
+const port_base_t PortK(0x106);
+const port_base_t PortL(0x109);
 #endif //__AVR_ATmega1280__
-
-extern const AvrPort NullPort;
 
 //Macro to expand steppers into Port, Pin, PinNumber and DDR
 #define STEPPER_PORT(PLETTER, PNUMBER)  {       _SFR_MEM_ADDR(PORT ## PLETTER), \

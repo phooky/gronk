@@ -28,6 +28,10 @@ namespace steppers {
   void reset_axes();
   void init();
   void enable(uint8_t which, bool enable = true);
+  void set_velocity(uint8_t which, int16_t velocity);
+  void setPotValue(const Pin& pin, uint8_t val);
+
+  void do_interrupt();
 };
 
 

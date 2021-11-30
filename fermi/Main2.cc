@@ -25,6 +25,7 @@
 #include "RGB_LED.hh"
 #include "LiquidCrystalSerial.hh"
 #include "ButtonArray.hh"
+#include "Steppers.hh"
 
 void reset(bool hard_reset) {
   ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -109,6 +110,8 @@ void init_timers() {
   TIMSK5 |= 1 << OCIE5A; // turn on OCR5A match interrupt
 }
 
+int intdbg = 0;
+
 int main() {
   INTERFACE_POWER.setDirection(true);
   INTERFACE_POWER.setValue(false);
@@ -121,6 +124,9 @@ int main() {
   SoftI2cManager::getI2cManager().init();
 
   reset(true);
+  steppers::init();
+  steppers::setPotValue(X_POT_PIN,40);
+  steppers::enable(0,true);
   init_timers();
   init_analog();
   start_analog_conversion(js_chan);
@@ -140,6 +146,7 @@ int main() {
     lcd.writeString("Hello world.");
   }
 
+  steppers::set_velocity(0,1000);
   while (1) {
     wdt_reset();
     _delay_ms(200);
@@ -149,6 +156,9 @@ int main() {
     lcd.setCursor(0,1);
     lcd.writeString("Port B:");
     lcd.writeInt(js_positions[1]);
+    lcd.setCursor(0,2);
+    lcd.writeInt(intdbg);
+    //lcd.writeInt(1 << 4);
   }
   return 0;
 }
@@ -158,6 +168,8 @@ ISR(TIMER2_COMPA_vect) {
 
 ISR(TIMER5_COMPA_vect) {
   // Handle stepper interrupt.
+  steppers::do_interrupt();
+  //intdbg++;
 }
 
 ISR(ADC_vect) {
