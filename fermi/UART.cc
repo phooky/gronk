@@ -139,8 +139,8 @@ public:
   }
 };
 
-CBuf<20> out_buf;
-CBuf<20> in_buf;
+CBuf<128> out_buf;
+CBuf<128> in_buf;
   
 void initialize() {
   INIT_SERIAL(0);
