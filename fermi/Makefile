@@ -11,7 +11,8 @@ TARGET_ELF=$(TARGET).elf
 TARGET_HEX=$(TARGET).hex
 
 OBJS=Main.o Pin.o SoftI2cManager.o TWI.o RGB_LED.o \
-	LiquidCrystalSerial.o ButtonArray.o Steppers.o
+	LiquidCrystalSerial.o ButtonArray.o Steppers.o \
+	UART.o
 
 %.o: %.cc
 	$(CPP) -c -o $@ $(CFLAGS) $<
