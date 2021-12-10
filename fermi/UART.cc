@@ -25,6 +25,8 @@
 #include <util/delay.h>
 #include <avr/io.h>
 
+namespace UART {
+  
 bool ovfl_in = false;
 
 // We support three platforms: Atmega168 (1 UART), Atmega644, and Atmega1280/2560
@@ -164,6 +166,16 @@ int write_buffer(uint8_t* buf, uint8_t length) {
   return idx;
 }
 
+/// Write a null-terminated string to the uart.
+int write_string(const char* str) {
+  int idx = 0;
+  while (str[idx] != 0) {
+    if (!write(str[idx])) return idx;
+    idx++;
+  }
+  return idx;
+}
+
 /// Return the amount of data available on the uart
 int available() {
   return in_buf.sz;
@@ -188,13 +200,15 @@ void enable(bool enabled) {
   else { DISABLE_SERIAL_INTERRUPTS(0); }
 }
 
+}
+
 // Send and receive interrupts
 ISR(USART0_RX_vect)
 {
-  ovfl_in = ovfl_in || !out_buf.queue(UDR0);
+  UART::ovfl_in = UART::ovfl_in || !UART::out_buf.queue(UDR0);
 }
 
 ISR(USART0_TX_vect)
 {
-  if (!out_buf.empty()) UDR0 = out_buf.dequeue();
+  if (!UART::out_buf.empty()) UDR0 = UART::out_buf.dequeue();
 }

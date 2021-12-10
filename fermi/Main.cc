@@ -26,6 +26,7 @@
 #include "LiquidCrystalSerial.hh"
 #include "ButtonArray.hh"
 #include "Steppers.hh"
+#include "UART.hh"
 
 void reset(bool hard_reset) {
   ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -99,19 +100,13 @@ void start_analog_conversion(unsigned char channel) {
   ADCSRA |= 1 << ADIE | 1 << ADSC;
 }
 
-// PF0-2
+/// Perform a blocking analog read on PF0-2
 unsigned int read_analog(unsigned char channel) {
-  // Write channel to ADMUX.
-  // ADMUX: REFS1/0 = b01 (AVCC VREF)
-  // ADMUX: ADLAR = 0 (ADCH/L are right-justified)
-  // ADMUX: MUX4-0 = ADCX channel (ADC0-ADC7)
+  // See comments on start_analog_conversion for details on how we
+  // set these registers.
   ADMUX = (1 << REFS0) | channel;
-  // ADSC is set to start conversion. This bit is cleared when the
-  // conversion is done.
   ADCSRA |= 1 << ADSC;
-  while ( ADCSRA & (1<<ADSC)) {
-  }
-  // When conversion completes, an interrupt can be triggered. (ADIF)
+  while ( ADCSRA & (1<<ADSC)) {} // poll until analog read completes.
   // Result is in ADCH and ADCL. ADCL *must* be read first (if more than
   // 8 bits are needed.
   unsigned int result = ADCL;
@@ -206,6 +201,8 @@ int main() {
   lcd.setCursor(0,0);
   start_state(SS_OFF);
 
+  UART::initialize();
+  UART::write_string("Ready.\n");
   while (1) {
     wdt_reset();
     _delay_ms(100);

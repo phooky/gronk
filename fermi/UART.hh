@@ -32,6 +32,9 @@ namespace UART {
   /// number of bytes successfully queued
   int write_buffer(uint8_t* buf, uint8_t length);
 
+  /// Write a null-terminated string to the uart.
+  int write_string(const char* str);
+  
   /// Return the amount of data available on the uart
   int available();
 
