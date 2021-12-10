@@ -137,7 +137,46 @@ void init_timers() {
 }
 
 int intdbg = 0;
+LiquidCrystalSerial lcd(LCD_STROBE, LCD_DATA, LCD_CLK);
 
+void start_state(SystemState newss) {
+  // shutdown previous mode
+  switch(ss) {
+  case SS_JOYSTICK:
+    steppers::enable(0,false);
+    steppers::enable(1,false);
+    break;
+  default:
+    break;
+  }
+  // Set current mode
+  ss = newss;
+  switch(ss) {
+  case SS_OFF:
+    steppers::enable(0,false);
+    steppers::enable(1,false);
+    RGB_LED::setCustomColor(0x10,0x10,0x99);
+    lcd.clear();
+    lcd.writeString("Steppers off.");
+    lcd.setCursor(0,1);
+    lcd.writeString("Press center button to");
+    lcd.setCursor(0,2);
+    lcd.writeString("turn on joystick control.");
+    break;
+  case SS_JOYSTICK:
+    steppers::enable(0,true);
+    steppers::enable(1,true);
+    RGB_LED::setCustomColor(0x99,0x10,0x10);
+    lcd.clear();
+    lcd.writeString("Joystick control.");
+    lcd.setCursor(0,1);
+    lcd.writeString("Press center button to");
+    lcd.setCursor(0,2);
+    lcd.writeString("turn off steppers.");
+    break;
+  }
+}
+  
 int main() {
   INTERFACE_POWER.setDirection(true);
   INTERFACE_POWER.setValue(false);
@@ -152,7 +191,7 @@ int main() {
   reset(true);
   steppers::init();
   steppers::setPotValue(X_POT_PIN,40);
-  steppers::setPotValue(Y_POT_PIN,40);
+  steppers::setPotValue(Y_POT_PIN,80);
   init_timers();
   init_analog();
   start_analog_conversion(js_chan);
@@ -162,15 +201,10 @@ int main() {
 
   ButtonArray::init();
   
-  LiquidCrystalSerial lcd(LCD_STROBE, LCD_DATA, LCD_CLK);
   lcd.begin(LCD_SCREEN_WIDTH,LCD_SCREEN_HEIGHT);
   lcd.clear(); lcd.home();
   lcd.setCursor(0,0);
-  if (ButtonArray::pressed() & LEFT) {
-    lcd.writeString("LEFT on start.");
-  } else {
-    lcd.writeString("Hello world.");
-  }
+  start_state(SS_OFF);
 
   while (1) {
     wdt_reset();
@@ -178,34 +212,23 @@ int main() {
     ButtonArray::scan();
     if (ButtonArray::pressed() && CENTER) switch (ss) {
       case SS_JOYSTICK:
-	steppers::enable(0,false);
-	steppers::enable(1,false);
-	ss = SS_OFF;
-	RGB_LED::setCustomColor(0x10,0x10,0x99);
+	start_state(SS_OFF);
 	break;
       case SS_OFF:
-	steppers::enable(0,true);
-	steppers::enable(1,true);
-	ss = SS_JOYSTICK;
-	RGB_LED::setCustomColor(0x99,0x10,0x10);
-	lcd.clear();
-	lcd.writeString("Steppers off.");
-	lcd.setCursor(0,1);
-	lcd.writeString("Press center button to");
-	lcd.setCursor(0,2);
-	lcd.writeString("turn on joystick control.");
+	start_state(SS_JOYSTICK);
+	break;
       }
-
+    
     if (ss == SS_JOYSTICK) {
-      lcd.clear();
-      lcd.writeString("vx:");
+      //lcd.clear();
+      //lcd.writeString("vx:");
       int v1 = vel_from_js(0);
-      lcd.writeInt(v1);
+      //lcd.writeInt(v1);
       steppers::set_velocity(0,v1);
-      lcd.setCursor(0,1);
-      lcd.writeString("vy:");
+      //lcd.setCursor(0,1);
+      //lcd.writeString("vy:");
       int v2 = vel_from_js(1);
-      lcd.writeInt(v2);
+      //lcd.writeInt(v2);
       steppers::set_velocity(1,v2);
     }
   }
