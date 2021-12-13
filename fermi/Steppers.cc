@@ -59,8 +59,7 @@ namespace steppers {
   } StepPins;
 
   const StepPins stepPins[STEPPER_COUNT] = {
-    { X_STEPPER_STEP, X_STEPPER_DIR, X_STEPPER_ENABLE,
-      X_STEPPER_MIN, X_STEPPER_MAX, X_POT_PIN },
+    AXIS_PIN_SET(X),
     AXIS_PIN_SET(Y),
     AXIS_PIN_SET(Z),
     AXIS_PIN_SET(A),

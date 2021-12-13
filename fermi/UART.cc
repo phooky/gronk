@@ -194,7 +194,11 @@ int read(uint8_t* buf, uint8_t n) {
   }
   return nc;
 }
-
+  
+uint8_t read_byte() {
+  return in_buf.dequeue();
+}
+    
 void enable(bool enabled) {
   if (enabled) { ENABLE_SERIAL_INTERRUPTS(0); }
   else { DISABLE_SERIAL_INTERRUPTS(0); }

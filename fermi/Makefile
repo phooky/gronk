@@ -12,7 +12,7 @@ TARGET_HEX=$(TARGET).hex
 
 OBJS=Main.o Pin.o SoftI2cManager.o TWI.o RGB_LED.o \
 	LiquidCrystalSerial.o ButtonArray.o Steppers.o \
-	UART.o
+	UART.o CommandParser.o
 
 %.o: %.cc
 	$(CPP) -c -o $@ $(CFLAGS) $<

@@ -27,6 +27,7 @@
 #include "ButtonArray.hh"
 #include "Steppers.hh"
 #include "UART.hh"
+#include "CommandParser.hh"
 
 void reset(bool hard_reset) {
   ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -115,19 +116,21 @@ unsigned int read_analog(unsigned char channel) {
 }
 
 void init_timers() {
+  // NB: Timer2 is unused, this is just nonsense for now
   // TIMER 2: microseconds, LED flasher, etc.
   // Reset and configure timer 2, the microsecond timer, advance_timer and debug LED flasher timer.
-  TCCR2A = 0x02; //CTC  //0x00;  
-  TCCR2B = 0x04; //prescaler at 1/64  //0x0A; /// prescaler at 1/8
-  OCR2A = 25; //Generate interrupts 16MHz / 64 / 25 = 10KHz  //INTERVAL_IN_MICROSECONDS;
+  TCCR2A = 0x02; // Output compare pins disabled, WGM1:0 = 10
+  TCCR2B = 0x04; // 00000100 WGM3:2 = 0, CS = 100
+  OCR2A = 25; // Generate interrupts 16MHz / 64 / 25 = 10KHz  
   OCR2B = 0;
   TIMSK2 |= 1 << OCIE2A; // turn on OCR2A match interrupt
 
-  // TIMER 5: stepper interupts.
-  TCCR5A = 0x00;
-  TCCR5B = 0x0A; // no prescaling
-  TCCR5C = 0x00;
-  OCR5A = 0x100; //INTERVAL_IN_MICROSECONDS * 16;
+  /// TIMER 5: stepper interupts. Currently running at 7.8KHz.
+  /// CS = 010   -- prescaler is CLK/8
+  /// WGM = 0100 -- CTC mode, count up from 0 to OCR5A and then reset to 0
+  TCCR5A = 0x00; // Output compare pins disabled, WGM1:0 = 00
+  TCCR5B = 0x0A; // 00001010 WGM3:2 = 01, CS = 010
+  OCR5A = 0x100; // 16MHz / 8(prescale) / 256(OCR5A) == 7812.5Hz
   TIMSK5 |= 1 << OCIE5A; // turn on OCR5A match interrupt
 }
 
@@ -205,6 +208,13 @@ int main() {
   UART::write_string("Ready.\n");
   while (1) {
     wdt_reset();
+    if (check_for_command()) {
+      if (cmd().mode == BAD_CMD) {
+	UART::write_string("ERR\n");
+      } else {
+	UART::write_string("OK\n");
+      }
+    }
     _delay_ms(100);
     ButtonArray::scan();
     if (ButtonArray::pressed() && CENTER) switch (ss) {

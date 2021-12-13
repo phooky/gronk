@@ -41,6 +41,9 @@ namespace UART {
   /// Read N bytes from the uart into the buffer
   /// Returns the number of bytes read
   int read(uint8_t* buf, uint8_t n);
+
+  /// Read a single byte from the uart
+  uint8_t read_byte();
 };
 
 #endif // UART_HH_
