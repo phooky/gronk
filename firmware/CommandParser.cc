@@ -23,8 +23,16 @@ void reset_command() {
     command.params[i].reset();
     command.mode = SCAN_FOR_CMD;
   }
+  command.neg = false;
+  command.frac_val = 0x1999; // 1/10th
 }
-  
+
+void finish_fp_parse() {
+  if (command.neg) command.cp().negate();
+  command.neg = false;
+  command.frac_val = 0x1999; // 1/10th
+}
+
 bool check_for_command() {
   while (UART::available()) {
     uint8_t c = UART::read_byte();
@@ -48,12 +56,19 @@ bool check_for_command() {
       command.mode = (command.curParam == PARAM_LAST)?BAD_CMD:SCAN_FOR_CODE_INT;
       break;
     case SCAN_FOR_CODE_INT:
-      if (c == '.') command.mode = SCAN_FOR_CODE_FRAC;
+      if (c == '-') command.neg = true;
+      else if (c == '.') command.mode = SCAN_FOR_CODE_FRAC;
       else if (c == ' ') command.mode = SCAN_FOR_CODE;
-      else if (is_int(c)) command.cp().integer = (command.cp().integer * 10) + (c - '0');
+      else if (is_int(c)) command.cp().int_part() = (command.cp().int_part() * 10) + (c - '0');
       else command.mode = BAD_CMD;
       break;
     case SCAN_FOR_CODE_FRAC:
+      if (c == ' ') {
+	finish_fp_parse();
+	command.mode = SCAN_FOR_CODE;
+      } else if (is_int(c)) {
+	command.cp().frac_part() += command.frac_val; command.frac_val /= 10;
+      } else command.mode = BAD_CMD;
     default:
       break;
     }

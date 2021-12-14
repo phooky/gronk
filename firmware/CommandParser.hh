@@ -10,11 +10,22 @@ typedef enum {
   CMD_READY,
 } ScanMode;
 
+// 16.16
 class Fixed32 {
 public:
-  uint16_t integer;
-  uint16_t fraction;
-  void reset() { integer = fraction = 0; }
+  union {
+    struct {
+      uint16_t frac_p;
+      int16_t int_p;
+    } v16;
+    int32_t v32;
+  } v;
+
+  void reset() { v.v32 = 0; }
+  void negate() { v.v32 = -v.v32; }
+
+  int16_t& int_part() { return v.v16.int_p; }
+  uint16_t& frac_part() { return v.v16.frac_p; }
 };
 
 enum {
@@ -32,6 +43,9 @@ typedef struct {
   uint8_t cmdValue;
   uint8_t curParam;
   ScanMode mode;
+  // FP state
+  uint16_t frac_val;
+  bool neg;
   // convenience fns
   Fixed32& cp() { return params[curParam]; }
 } Command;
