@@ -1,3 +1,6 @@
+#ifndef __CBUF_HH__
+#define __CBUF_HH__
+
 ///
 /// Generalized simple circular buffer implementation
 ///
@@ -40,3 +43,5 @@ public:
     return rv;
   }
 };
+
+#endif

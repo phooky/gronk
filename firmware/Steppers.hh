@@ -37,7 +37,7 @@ namespace steppers {
   /// Check if there's space on the movement queue for another move
   /// or dwell
   bool queue_ready();
-  bool enqueue_move(uint16_t x, uint16_t y, uint16_t z, uint16_t feed);
+  bool enqueue_move(int32_t x, int32_t y, int32_t z, uint16_t feed);
   bool enqueue_dwell(uint16_t milliseconds);
   
   void do_interrupt();

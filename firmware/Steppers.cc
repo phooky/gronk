@@ -20,6 +20,7 @@
 #define __STDC_LIMIT_MACROS
 #include "Steppers.hh"
 #include "SoftI2cManager.hh"
+#include "CBuf.hh"
 #include <stdint.h>
 
 #define A_STEPPER_MIN NullPin
@@ -40,6 +41,17 @@ extern int intdbg;
     axis ## _POT_PIN }
 
 namespace steppers {
+
+  typedef struct {
+    struct {
+      int16_t vel;
+      int16_t acc;
+    } axis[3];
+    uint32_t ticks;
+  } Move;
+
+  CBuf<16,Move> moveq;
+  int32_t post_queue_pos[3];
 
   typedef struct {
     int32_t position;
@@ -123,7 +135,22 @@ namespace steppers {
     axis[which].velocity = velocity;
     sei();
   }
-
+  
+  /// Check if there's space on the movement queue for another move
+  /// or dwell
+  bool queue_ready() {
+    return !moveq.full();
+  }
+  
+  bool enqueue_move(int32_t x, int32_t y, int32_t z, uint16_t feed) {
+    // Stepper loop frequency: 7812.5Hz
+    return true;
+  }
+  
+  bool enqueue_dwell(uint16_t milliseconds) {
+    return true;
+  }
+  
   void do_interrupt() {
     cli();
     for (int i = 0; i < 2; i++) {
