@@ -212,11 +212,22 @@ int main() {
       if (cmd().mode == BAD_CMD) {
 	UART::write_string("ERR\n");
       } else {
-	UART::write_string("OK\n");
+	if (cmd().cmdCode == 'M') {
+	  if (cmd().cmdValue == 17 || cmd().cmdValue == 18) { // Enable/disable steppers
+	    for (int i = 0; i < 3; i++)
+	      if (cmd().params[i].int_part() != 0) {
+		UART::write('X'+i);
+		steppers::enable(i, cmd().cmdValue == 17);
+	      }
+	    UART::write_string(cmd().cmdValue == 17?"ENABLE\n":"DISABLE\n");
+	  }
+	  else UART::write_string("Mcode not handled\n");
+	}
+	else UART::write_string("IGN\n");
       }
       reset_command();
     }
-    _delay_ms(100);
+    _delay_ms(50);
     ButtonArray::scan();
     if (ButtonArray::pressed() && CENTER) switch (ss) {
       case SS_JOYSTICK:

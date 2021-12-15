@@ -36,13 +36,15 @@ void finish_fp_parse() {
 bool check_for_command() {
   while (UART::available()) {
     uint8_t c = UART::read_byte();
-    if (c == '\n' || c == '\r') { // command complete
-      return true;
-    }
+    bool end_of_command = (c == '\n' || c == '\r');
+    // treat a command completion as if it had a trailing space
+    // (this will complete any parameter scans)
+    if (end_of_command) c = ' '; 
     switch (command.mode) {
     case SCAN_FOR_CMD:
       if (c == 'G' || c == 'M') {
 	command.cmdCode = c; command.mode = SCAN_FOR_CMD_PARAM;
+	command.cmdValue = 0;
       } else command.mode = BAD_CMD;
       break;
     case SCAN_FOR_CMD_PARAM:
@@ -75,6 +77,7 @@ bool check_for_command() {
     default:
       break;
     }
+    if (end_of_command) return true;
   }
   return false;
 }

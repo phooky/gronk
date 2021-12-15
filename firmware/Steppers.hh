@@ -25,6 +25,9 @@
 #include "Pin.hh"
 
 namespace steppers {
+  enum {
+    X, Y, Z, A, B
+  };
   void reset_axes();
   void init();
   void enable(uint8_t which, bool enable = true);
