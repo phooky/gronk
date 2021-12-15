@@ -18,6 +18,7 @@
 
 #include "UART.hh"
 #include "Pin.hh"
+#include "CBuf.hh"
 #include <stdint.h>
 #include <avr/sfr_defs.h>
 #include <avr/interrupt.h>
@@ -103,46 +104,8 @@ UCSR##uart_##B &= ~(_BV(RXCIE##uart_) | _BV(TXCIE##uart_)); \
 }
 
 
-// Circular buffer implementation
-template <int N>
-class CBuf {
-public:
-  const uint8_t blen = N;
-  uint8_t buf[N];
-  uint8_t data; // index to first data byte
-  uint8_t sz; // size of valid data
-  CBuf() : data(0), sz(0) {}
-  
-  bool full() {
-    return sz == blen;
-  }
-
-  bool empty() {
-    return sz == 0;
-  }
-  
-  bool queue(uint8_t in) {
-    if (full()) return false;
-    cli();
-    buf[(data+sz)%blen] = in;
-    sz++;
-    sei();
-    return true;
-  }
-
-  uint8_t dequeue() {
-    if (empty()) return 0xff; // Should check for empty first
-    cli();
-    uint8_t rv = buf[data];
-    sz--;
-    data = (data + 1)%blen;
-    sei();
-    return rv;
-  }
-};
-
-CBuf<128> out_buf;
-CBuf<128> in_buf;
+CBuf<128,uint8_t> out_buf;
+CBuf<128,uint8_t> in_buf;
   
 void initialize() {
   INIT_SERIAL(0);

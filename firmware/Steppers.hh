@@ -34,6 +34,12 @@ namespace steppers {
   void set_velocity(uint8_t which, int16_t velocity);
   void setPotValue(const Pin& pin, uint8_t val);
 
+  /// Check if there's space on the movement queue for another move
+  /// or dwell
+  bool queue_ready();
+  bool enqueue_move(uint16_t x, uint16_t y, uint16_t z, uint16_t feed);
+  bool enqueue_dwell(uint16_t milliseconds);
+  
   void do_interrupt();
 };
 
