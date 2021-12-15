@@ -44,6 +44,9 @@ namespace UART {
 
   /// Read a single byte from the uart
   uint8_t read_byte();
+
+  /// Enable/disable uart interrupts
+  void enable(bool enabled);
 };
 
 #endif // UART_HH_

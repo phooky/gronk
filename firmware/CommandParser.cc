@@ -36,7 +36,7 @@ void finish_fp_parse() {
 bool check_for_command() {
   while (UART::available()) {
     uint8_t c = UART::read_byte();
-    if (c == '\n') { // command complete
+    if (c == '\n' || c == '\r') { // command complete
       return true;
     }
     switch (command.mode) {
@@ -53,11 +53,14 @@ bool check_for_command() {
     case SCAN_FOR_CODE:
       if (c == ' ') break;
       command.curParam = paramIdx(c);
-      command.mode = (command.curParam == PARAM_LAST)?BAD_CMD:SCAN_FOR_CODE_INT;
+      command.mode = (command.curParam == PARAM_LAST)?BAD_CMD:SCAN_FOR_CODE_FIRST;
       break;
-    case SCAN_FOR_CODE_INT:
+    case SCAN_FOR_CODE_FIRST:
       if (c == '-') command.neg = true;
-      else if (c == '.') command.mode = SCAN_FOR_CODE_FRAC;
+      else if (c == ' ') command.cp().int_part() = 1; // It's a flag, treat like a bool
+      command.mode = SCAN_FOR_CODE_INT;
+    case SCAN_FOR_CODE_INT:
+      if (c == '.') command.mode = SCAN_FOR_CODE_FRAC;
       else if (c == ' ') command.mode = SCAN_FOR_CODE;
       else if (is_int(c)) command.cp().int_part() = (command.cp().int_part() * 10) + (c - '0');
       else command.mode = BAD_CMD;

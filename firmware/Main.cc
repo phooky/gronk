@@ -214,6 +214,7 @@ int main() {
       } else {
 	UART::write_string("OK\n");
       }
+      reset_command();
     }
     _delay_ms(100);
     ButtonArray::scan();

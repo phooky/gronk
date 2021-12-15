@@ -146,10 +146,11 @@ CBuf<128> in_buf;
   
 void initialize() {
   INIT_SERIAL(0);
+  enable(true);
 }
 
 bool write(uint8_t byte) {
-  if (out_buf.empty()) {
+  if (out_buf.empty() && (UCSR0A & (1<<UDRE0))) {
     UDR0 = byte; return true;
   }
   else return out_buf.queue(byte);
@@ -209,7 +210,7 @@ void enable(bool enabled) {
 // Send and receive interrupts
 ISR(USART0_RX_vect)
 {
-  UART::ovfl_in = UART::ovfl_in || !UART::out_buf.queue(UDR0);
+  UART::ovfl_in = UART::ovfl_in || !UART::in_buf.queue(UDR0);
 }
 
 ISR(USART0_TX_vect)

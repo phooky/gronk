@@ -4,6 +4,7 @@ typedef enum {
   SCAN_FOR_CMD,
   SCAN_FOR_CMD_PARAM,
   SCAN_FOR_CODE,
+  SCAN_FOR_CODE_FIRST,
   SCAN_FOR_CODE_INT,
   SCAN_FOR_CODE_FRAC,
   BAD_CMD,
@@ -51,4 +52,5 @@ typedef struct {
 } Command;
 
 bool check_for_command();
+void reset_command();
 Command& cmd();
