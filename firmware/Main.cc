@@ -229,7 +229,7 @@ int main() {
     }
     _delay_ms(50);
     ButtonArray::scan();
-    if (ButtonArray::pressed() && CENTER) switch (ss) {
+    if (ButtonArray::pressed() & CENTER) switch (ss) {
       case SS_JOYSTICK:
 	start_state(SS_OFF);
 	break;

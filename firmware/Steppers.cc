@@ -21,6 +21,7 @@
 #include "Steppers.hh"
 #include "SoftI2cManager.hh"
 #include "CBuf.hh"
+#include "Fixed32.hh"
 #include <stdint.h>
 
 #define A_STEPPER_MIN NullPin
@@ -51,10 +52,10 @@ namespace steppers {
   } Move;
 
   CBuf<16,Move> moveq;
-  int32_t post_queue_pos[3];
+  Fixed32 post_queue_pos[3];
 
   typedef struct {
-    int32_t position;
+    Fixed32 position;
     int16_t velocity;
     int16_t acceleration;
   } StepAxisInfo;
@@ -101,10 +102,11 @@ namespace steppers {
 
   void reset_axes() {
     for (StepAxisInfo& a : axis) {
-      a.position = 0;
+      a.position.reset();
       a.velocity = 0;
       a.acceleration = 0;
     }
+    for (Fixed32& f : post_queue_pos) f.reset();
   }
 
   void init_pins() {
@@ -144,6 +146,11 @@ namespace steppers {
   
   bool enqueue_move(int32_t x, int32_t y, int32_t z, uint16_t feed) {
     // Stepper loop frequency: 7812.5Hz
+    bool empty = moveq.empty();
+    x -= (empty?axis[0].position:post_queue_pos[0]).v.v32;
+    y -= (empty?axis[0].position:post_queue_pos[1]).v.v32;
+    z -= (empty?axis[0].position:post_queue_pos[2]).v.v32;
+    
     return true;
   }
   
@@ -156,8 +163,8 @@ namespace steppers {
     for (int i = 0; i < 2; i++) {
       auto& a = axis[i]; const auto& p = stepPins[i];
       p.dir.setValue(!(a.velocity & (1L<<15)));
-      a.position += a.velocity;
-      p.step.setValue(a.position & (1L<<15));
+      a.position.v.v32 += a.velocity;
+      p.step.setValue(a.position.v.v32 & (1L<<15));
     }
     sei();
   }

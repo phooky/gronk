@@ -25,6 +25,10 @@
 #define MAX_STEPPERS    5
 #define EXTRUDERS       2
 
+#define XY_STEPS_PER_MM 88.888889
+#define Z_STEPS_PER_MM 400
+
+
 // microstepping is 1 / (1 << MICROSTEPPING)
 //  0 for 1/1
 //  1 for 1/2
