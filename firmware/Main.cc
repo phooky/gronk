@@ -62,7 +62,7 @@ unsigned char js_chan = 0; // current channel being read
 
 const int VEL_SCALE = 300;
 
-int16_t vel_from_js(int axis, bool inverted = false;) {
+int16_t vel_from_js(int axis, bool inverted = false) {
   cli();
   int pos = js_positions[axis];
   sei();
