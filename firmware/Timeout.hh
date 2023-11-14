@@ -33,53 +33,53 @@
 /// has elapsed, it can not go back to a valid state without being explicitly
 /// reset. \ingroup SoftwareLibraries
 class Timeout {
-private:
-  bool active;    ///< True if the timeout object is actively counting down.
-  bool elapsed;   ///< True if the timeout object has elapsed.
-  bool is_paused; ///< True if the timeout object is paused
+  private:
+    bool active;    ///< True if the timeout object is actively counting down.
+    bool elapsed;   ///< True if the timeout object has elapsed.
+    bool is_paused; ///< True if the timeout object is paused
 
-  // TODO: Instead of storing start and duration, precompute and store the
-  // elapse time.
-  micros_t start_stamp_micros;
-  micros_t duration_micros;
-  micros_t pause_micros;
+    // TODO: Instead of storing start and duration, precompute and store the
+    // elapse time.
+    micros_t start_stamp_micros;
+    micros_t duration_micros;
+    micros_t pause_micros;
 
-public:
-  /// Instantiate a new timeout object.
-  Timeout();
+  public:
+    /// Instantiate a new timeout object.
+    Timeout();
 
-  /// Start a new timeout cycle that will elapse after the given amount of time.
-  /// \param [in] duration_micros Microseconds until the timeout cycle should
-  /// elapse.
-  void start(micros_t duration_micros);
+    /// Start a new timeout cycle that will elapse after the given amount of
+    /// time. \param [in] duration_micros Microseconds until the timeout cycle
+    /// should elapse.
+    void start(micros_t duration_micros);
 
-  /// Test whether the current timeout cycle has elapsed. When called, this
-  /// function will compare the system time to the calculated time that the
-  /// timeout should expire, and if it has, the timer is marked as elapsed and
-  /// not active. \return True if the timeout has elapsed.
-  bool hasElapsed();
+    /// Test whether the current timeout cycle has elapsed. When called, this
+    /// function will compare the system time to the calculated time that the
+    /// timeout should expire, and if it has, the timer is marked as elapsed and
+    /// not active. \return True if the timeout has elapsed.
+    bool hasElapsed();
 
-  ///
-  /// \return True if the timeout is still running.
-  bool isActive() const { return active; }
+    ///
+    /// \return True if the timeout is still running.
+    bool isActive() const { return active; }
 
-  /// Stop the current timeout.
-  void abort();
+    /// Stop the current timeout.
+    void abort();
 
-  /// Clear the timeout so it can be used again
-  void clear();
+    /// Clear the timeout so it can be used again
+    void clear();
 
-  /// restart timeout with the same time
-  void restart();
+    /// restart timeout with the same time
+    void restart();
 
-  /// pause the timer
-  /// while paused, the timer will not increment
-  /// \param pause_in true to pause, false to unpause
-  void pause(bool pause_in);
+    /// pause the timer
+    /// while paused, the timer will not increment
+    /// \param pause_in true to pause, false to unpause
+    void pause(bool pause_in);
 
-  /// get the microseconds elapsed since starting the timer
-  /// \return microseconds elapsed
-  micros_t getCurrentElapsed();
+    /// get the microseconds elapsed since starting the timer
+    /// \return microseconds elapsed
+    micros_t getCurrentElapsed();
 };
 
 #endif // TIMEOUT_HH_

@@ -49,60 +49,60 @@
 // TODO:  make variable names for rs, rw, e places in the output vector
 
 class LiquidCrystalSerial {
-public:
-  LiquidCrystalSerial(Pin strobe, Pin data, Pin clk);
+  public:
+    LiquidCrystalSerial(Pin strobe, Pin data, Pin clk);
 
-  void init();
+    void init();
 
-  void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
+    void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
 
-  void clear();
-  void home();
+    void clear();
+    void home();
 
-  void noDisplay();
-  void display();
-  void noBlink();
-  void blink();
-  void noCursor();
-  void cursor();
-  void scrollDisplayLeft();
-  void scrollDisplayRight();
-  void leftToRight();
-  void rightToLeft();
-  void autoscroll();
-  void noAutoscroll();
+    void noDisplay();
+    void display();
+    void noBlink();
+    void blink();
+    void noCursor();
+    void cursor();
+    void scrollDisplayLeft();
+    void scrollDisplayRight();
+    void leftToRight();
+    void rightToLeft();
+    void autoscroll();
+    void noAutoscroll();
 
-  void createChar(uint8_t, uint8_t[]);
-  void setCursor(uint8_t x, uint8_t y);
-  void setCursorExt(int8_t col, int8_t row);
-  virtual void write(uint8_t);
+    void createChar(uint8_t, uint8_t[]);
+    void setCursor(uint8_t x, uint8_t y);
+    void setCursorExt(int8_t col, int8_t row);
+    virtual void write(uint8_t);
 
-  void writeString(const char message[]);
-  void writeInt(int val);
-  void writeFromPgmspace(const unsigned char message[]);
+    void writeString(const char message[]);
+    void writeInt(int val);
+    void writeFromPgmspace(const unsigned char message[]);
 
-  void command(uint8_t);
+    void command(uint8_t);
 
-private:
-  void send(uint8_t, bool);
-  void writeSerial(uint8_t);
-  void load(uint8_t);
-  void pulseEnable(uint8_t value);
+  private:
+    void send(uint8_t, bool);
+    void writeSerial(uint8_t);
+    void load(uint8_t);
+    void pulseEnable(uint8_t value);
 
-  Pin _strobe_pin; // LOW: command.  HIGH: character.
-  Pin _data_pin;   // LOW: write to LCD.  HIGH: read from LCD.
-  Pin _clk_pin;    // activated by a HIGH pulse.
+    Pin _strobe_pin; // LOW: command.  HIGH: character.
+    Pin _data_pin;   // LOW: write to LCD.  HIGH: read from LCD.
+    Pin _clk_pin;    // activated by a HIGH pulse.
 
-  uint8_t _displayfunction;
-  uint8_t _displaycontrol;
-  uint8_t _displaymode;
+    uint8_t _displayfunction;
+    uint8_t _displaycontrol;
+    uint8_t _displaymode;
 
-  uint8_t _initialized;
+    uint8_t _initialized;
 
-  uint8_t _xcursor;
-  uint8_t _ycursor;
+    uint8_t _xcursor;
+    uint8_t _ycursor;
 
-  uint8_t _numlines, _numCols;
+    uint8_t _numlines, _numCols;
 };
 
 #endif // LIQUID_CRYSTAL_HH

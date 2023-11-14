@@ -23,17 +23,17 @@
 /// Simple wrapper class for encapsulating the PSU functionality
 /// \ingroup SoftwareLibraries
 class PSU {
-private:
-  Pin psu_pin; ///< Power supply enable pin
-public:
-  PSU(const Pin &psu);
+  private:
+    Pin psu_pin; ///< Power supply enable pin
+  public:
+    PSU(const Pin &psu);
 
-  /// Initialize the PSU
-  void init();
+    /// Initialize the PSU
+    void init();
 
-  /// Turn the PSU on or off
-  /// \param[in] on True to turn the PSU on, False to turn it off.
-  void turnOn(bool on);
+    /// Turn the PSU on or off
+    /// \param[in] on True to turn the PSU on, False to turn it off.
+    void turnOn(bool on);
 };
 
 #endif // BOARDS_RRMBV12_PSU_HH_

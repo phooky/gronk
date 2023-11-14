@@ -20,11 +20,11 @@
 PSU::PSU(const Pin &psu) : psu_pin(psu) {}
 
 void PSU::init() {
-  psu_pin.setDirection(true);
-  turnOn(true);
+    psu_pin.setDirection(true);
+    turnOn(true);
 }
 
 void PSU::turnOn(bool on) {
-  // PSU pin is pulled low to turn on power supply
-  psu_pin.setValue(!on);
+    // PSU pin is pulled low to turn on power supply
+    psu_pin.setValue(!on);
 }

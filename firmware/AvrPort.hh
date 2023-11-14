@@ -74,9 +74,9 @@ const port_base_t PortL(0x109);
 
 // Macro to expand steppers into Port, Pin, PinNumber and DDR
 #define STEPPER_PORT(PLETTER, PNUMBER)                                         \
-  {                                                                            \
-    _SFR_MEM_ADDR(PORT##PLETTER), _SFR_MEM_ADDR(PIN##PLETTER),                 \
-        PIN##PLETTER##PNUMBER, _SFR_MEM_ADDR(DDR##PLETTER)                     \
-  }
+    {                                                                          \
+        _SFR_MEM_ADDR(PORT##PLETTER), _SFR_MEM_ADDR(PIN##PLETTER),             \
+            PIN##PLETTER##PNUMBER, _SFR_MEM_ADDR(DDR##PLETTER)                 \
+    }
 
 #endif // SHARED_AVR_PORT_HH_

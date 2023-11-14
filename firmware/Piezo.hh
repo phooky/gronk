@@ -117,18 +117,18 @@
 #include "Types.hh"
 
 struct Sound {
-  uint16_t freq;
-  uint16_t durationMs;
+    uint16_t freq;
+    uint16_t durationMs;
 };
 
 enum TuneId {
-  TUNE_ERROR = 0,
-  TUNE_PRINT_DONE = 1,
-  TUNE_STARTUP = 3,
-  TUNE_MAKERBOT_TV = 4,
-  TUNE_BEETHOVEN_5TH = 5,
-  TUNE_FILAMENT_START = 6,
-  TUNE_PRINT_START = 7,
+    TUNE_ERROR = 0,
+    TUNE_PRINT_DONE = 1,
+    TUNE_STARTUP = 3,
+    TUNE_MAKERBOT_TV = 4,
+    TUNE_BEETHOVEN_5TH = 5,
+    TUNE_FILAMENT_START = 6,
+    TUNE_PRINT_START = 7,
 };
 
 namespace Piezo {

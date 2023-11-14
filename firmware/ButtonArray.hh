@@ -4,11 +4,11 @@
 #include <util/atomic.h>
 
 enum Button {
-  CENTER = 1 << 2,
-  RIGHT = 1 << 3,
-  LEFT = 1 << 6,
-  DOWN = 1 << 4,
-  UP = 1 << 5,
+    CENTER = 1 << 2,
+    RIGHT = 1 << 3,
+    LEFT = 1 << 6,
+    DOWN = 1 << 4,
+    UP = 1 << 5,
 };
 
 namespace ButtonArray {
