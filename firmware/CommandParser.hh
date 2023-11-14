@@ -1,5 +1,5 @@
-#include <stdint.h>
 #include "Fixed32.hh"
+#include <stdint.h>
 
 typedef enum {
   SCAN_FOR_CMD,
@@ -12,14 +12,7 @@ typedef enum {
   CMD_READY,
 } ScanMode;
 
-enum {
-  X = 0,
-  Y = 1,
-  Z = 2,
-  F = 3,
-  S = 4,
-  PARAM_LAST
-};
+enum { X = 0, Y = 1, Z = 2, F = 3, S = 4, PARAM_LAST };
 
 typedef struct {
   Fixed32 params[PARAM_LAST];
@@ -31,9 +24,9 @@ typedef struct {
   uint16_t frac_val;
   bool neg;
   // convenience fns
-  Fixed32& cp() { return params[curParam]; }
+  Fixed32 &cp() { return params[curParam]; }
 } Command;
 
 bool check_for_command();
 void reset_command();
-Command& cmd();
+Command &cmd();

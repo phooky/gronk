@@ -19,38 +19,30 @@
  */
 
 #include "SoftI2cManager.hh"
-#include <util/delay.h>
 #include <util/atomic.h>
+#include <util/delay.h>
 
 // initiate static i2cManager instance
 SoftI2cManager SoftI2cManager::i2cManager;
 
-// constructor 
-SoftI2cManager::SoftI2cManager():
-  sdaPins{ X_POT_PIN, Y_POT_PIN, Z_POT_PIN, A_POT_PIN, B_POT_PIN },
-  sclPin(POTS_SCL),
-  numPins(STEPPER_COUNT)
-{
-}
-
+// constructor
+SoftI2cManager::SoftI2cManager()
+    : sdaPins{X_POT_PIN, Y_POT_PIN, Z_POT_PIN, A_POT_PIN, B_POT_PIN},
+      sclPin(POTS_SCL), numPins(STEPPER_COUNT) {}
 
 // init pins and set bus high
-void SoftI2cManager::init()
-{
-    for (uint8_t i = 0; i < numPins; i++)
-    {
-        sdaPins[i].setDirection(true);
-        sdaPins[i].setValue(true);
-    }
-    sclPin.setDirection(true);
-    sclPin.setValue(true);
-    
+void SoftI2cManager::init() {
+  for (uint8_t i = 0; i < numPins; i++) {
+    sdaPins[i].setDirection(true);
+    sdaPins[i].setValue(true);
+  }
+  sclPin.setDirection(true);
+  sclPin.setValue(true);
 }
 
 //------------------------------------------------------------------------------
 // read a byte and send Ack if last is false else Nak to terminate read
-uint8_t SoftI2cManager::read(bool last, const Pin &sdaPin)
-{
+uint8_t SoftI2cManager::read(bool last, const Pin &sdaPin) {
   uint8_t b = 0;
   // make sure pullup enabled
   sdaPin.setValue(true);
@@ -61,7 +53,8 @@ uint8_t SoftI2cManager::read(bool last, const Pin &sdaPin)
     b <<= 1;
     _delay_us(I2C_DELAY_USEC);
     sclPin.setValue(true);
-    if (sdaPin.getValue()) b |= 1;
+    if (sdaPin.getValue())
+      b |= 1;
     sclPin.setValue(false);
   }
   // send Ack or Nak
@@ -71,55 +64,51 @@ uint8_t SoftI2cManager::read(bool last, const Pin &sdaPin)
   _delay_us(I2C_DELAY_USEC);
   sclPin.setValue(false);
   sdaPin.setValue(true);
-    
+
   return b;
 }
 //------------------------------------------------------------------------------
 // send new address and read/write without stop
-uint8_t SoftI2cManager::restart(uint8_t addressRW, const Pin &sdaPin)
-{
+uint8_t SoftI2cManager::restart(uint8_t addressRW, const Pin &sdaPin) {
   sclPin.setValue(true);
   return start(addressRW, sdaPin);
 }
 //------------------------------------------------------------------------------
 // issue a start condition for i2c address with read/write bit
-uint8_t SoftI2cManager::start(uint8_t addressRW, const Pin &sdaPin)
-{
-    for(uint8_t i = 0; i < numPins; i++)
-        sdaPins[i].setValue(false);
+uint8_t SoftI2cManager::start(uint8_t addressRW, const Pin &sdaPin) {
+  for (uint8_t i = 0; i < numPins; i++)
+    sdaPins[i].setValue(false);
   _delay_us(I2C_DELAY_USEC);
   sclPin.setValue(false);
   return write(addressRW, sdaPin);
 }
 //------------------------------------------------------------------------------
 // issue a stop condition
-void SoftI2cManager::stop()
-{
+void SoftI2cManager::stop() {
   _delay_us(I2C_DELAY_USEC);
-   sclPin.setValue(true);  
+  sclPin.setValue(true);
   _delay_us(I2C_DELAY_USEC);
-    for(uint8_t i = 0; i < numPins; i++)
-        sdaPins[i].setValue(true);  
+  for (uint8_t i = 0; i < numPins; i++)
+    sdaPins[i].setValue(true);
   _delay_us(I2C_DELAY_USEC);
 }
 //------------------------------------------------------------------------------
 // write byte and return true for Ack or false for Nak
-bool SoftI2cManager::write(uint8_t b, const Pin &sdaPin)
-{
+bool SoftI2cManager::write(uint8_t b, const Pin &sdaPin) {
   // write byte
   for (uint8_t m = 0X80; m != 0; m >>= 1) {
     // don't change this loop unless you verivy the change with a scope
-     sdaPin.setValue((m & b) != 0);
-     sclPin.setValue(true);  
+    sdaPin.setValue((m & b) != 0);
+    sclPin.setValue(true);
     _delay_us(I2C_DELAY_USEC);
-     sclPin.setValue(false);  
+    sclPin.setValue(false);
   }
   // get Ack or Nak
-   sdaPin.setValue(true);  
-   sdaPin.setDirection(false); 
-   sclPin.setValue(true);  
-   b = sdaPin.getValue();
-   sclPin.setValue(false); 
-   sdaPin.setDirection(true);
-   return b == 0;
+  sdaPin.setValue(true);
+  sdaPin.setDirection(false);
+  sclPin.setValue(true);
+  b = sdaPin.getValue();
+  sclPin.setValue(false);
+  sdaPin.setDirection(true);
+  return b == 0;
 }

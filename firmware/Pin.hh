@@ -14,7 +14,7 @@ public:
 
 public:
   Pin(const port_base_t port_in, const uint8_t pin_index_in);
-  //Pin(const Pin& other_pin);
+  // Pin(const Pin& other_pin);
   void setDirection(bool out) const;
 
   void setValue(bool value) const;

@@ -3,10 +3,10 @@
 
 // TODO: Proper attribution
 
-#include <stdint.h>
-#include <avr/pgmspace.h>
-#include "Pin.hh"
 #include "Configuration.hh"
+#include "Pin.hh"
+#include <avr/pgmspace.h>
+#include <stdint.h>
 
 // commands
 #define LCD_CLEARDISPLAY 0x01
@@ -53,7 +53,7 @@ public:
   LiquidCrystalSerial(Pin strobe, Pin data, Pin clk);
 
   void init();
-    
+
   void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
 
   void clear();
@@ -73,7 +73,7 @@ public:
   void noAutoscroll();
 
   void createChar(uint8_t, uint8_t[]);
-  void setCursor(uint8_t x, uint8_t y); 
+  void setCursor(uint8_t x, uint8_t y);
   void setCursorExt(int8_t col, int8_t row);
   virtual void write(uint8_t);
 
@@ -90,8 +90,8 @@ private:
   void pulseEnable(uint8_t value);
 
   Pin _strobe_pin; // LOW: command.  HIGH: character.
-  Pin _data_pin; // LOW: write to LCD.  HIGH: read from LCD.
-  Pin _clk_pin; // activated by a HIGH pulse.
+  Pin _data_pin;   // LOW: write to LCD.  HIGH: read from LCD.
+  Pin _clk_pin;    // activated by a HIGH pulse.
 
   uint8_t _displayfunction;
   uint8_t _displaycontrol;
@@ -102,7 +102,7 @@ private:
   uint8_t _xcursor;
   uint8_t _ycursor;
 
-  uint8_t _numlines,_numCols;
+  uint8_t _numlines, _numCols;
 };
 
 #endif // LIQUID_CRYSTAL_HH

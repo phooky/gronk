@@ -22,31 +22,31 @@
 
 namespace UART {
 
-  /// Initialize the UART module
-  void initialize();
+/// Initialize the UART module
+void initialize();
 
-  /// Queue a byte for writing; returns true if successfully queued
-  bool write(uint8_t byte);
+/// Queue a byte for writing; returns true if successfully queued
+bool write(uint8_t byte);
 
-  /// Queue the given number of bytes of the buffer; returns the
-  /// number of bytes successfully queued
-  int write_buffer(uint8_t* buf, uint8_t length);
+/// Queue the given number of bytes of the buffer; returns the
+/// number of bytes successfully queued
+int write_buffer(uint8_t *buf, uint8_t length);
 
-  /// Write a null-terminated string to the uart.
-  int write_string(const char* str);
-  
-  /// Return the amount of data available on the uart
-  int available();
+/// Write a null-terminated string to the uart.
+int write_string(const char *str);
 
-  /// Read N bytes from the uart into the buffer
-  /// Returns the number of bytes read
-  int read(uint8_t* buf, uint8_t n);
+/// Return the amount of data available on the uart
+int available();
 
-  /// Read a single byte from the uart
-  uint8_t read_byte();
+/// Read N bytes from the uart into the buffer
+/// Returns the number of bytes read
+int read(uint8_t *buf, uint8_t n);
 
-  /// Enable/disable uart interrupts
-  void enable(bool enabled);
-};
+/// Read a single byte from the uart
+uint8_t read_byte();
+
+/// Enable/disable uart interrupts
+void enable(bool enabled);
+}; // namespace UART
 
 #endif // UART_HH_

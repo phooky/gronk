@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
- 
- #ifndef TWI_HH
- #define TWI_HH
- 
- void TWI_init();
- 
- uint8_t TWI_write_data(uint8_t address, uint8_t * data, uint8_t length);
-  uint8_t TWI_read_byte(uint8_t address, uint8_t * data, uint8_t length);
-  uint8_t TWI_write_byte(uint8_t address, uint8_t data);
-  
-  #endif
+
+#ifndef TWI_HH
+#define TWI_HH
+
+void TWI_init();
+
+uint8_t TWI_write_data(uint8_t address, uint8_t *data, uint8_t length);
+uint8_t TWI_read_byte(uint8_t address, uint8_t *data, uint8_t length);
+uint8_t TWI_write_byte(uint8_t address, uint8_t data);
+
+#endif

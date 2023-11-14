@@ -21,8 +21,8 @@
 #ifndef SOFT_I2C_MANAGER
 #define SOFT_I2C_MANAGER
 
-#include "Pin.hh"
 #include "Configuration.hh"
+#include "Pin.hh"
 
 // delay used to tweek signals
 #define I2C_DELAY_USEC 4
@@ -33,35 +33,33 @@
 
 class SoftI2cManager {
 private:
-    
-    static SoftI2cManager i2cManager;
-public:
-    SoftI2cManager();
-    static SoftI2cManager& getI2cManager() {return i2cManager; }
-    
+  static SoftI2cManager i2cManager;
 
-  
+public:
+  SoftI2cManager();
+  static SoftI2cManager &getI2cManager() { return i2cManager; }
+
   /** init bus */
   void init();
-  
+
   /** read a byte and send Ack if last is false else Nak to terminate read */
   uint8_t read(bool last, const Pin &sdaPin);
-  
+
   /** send new address and read/write bit without stop */
   uint8_t restart(uint8_t addressRW, const Pin &sdaPin);
-  
+
   /** issue a start condition for i2c address with read/write bit */
   uint8_t start(uint8_t addressRW, const Pin &sdaPin);
-  
+
   /** issue a stop condition */
   void stop(void);
-  
+
   /** write byte and return true for Ack or false for Nak */
   bool write(uint8_t b, const Pin &sdaPin);
-    
+
 private:
-    Pin sdaPins[MAX_STEPPERS];
-    Pin sclPin;
-    uint8_t numPins;
+  Pin sdaPins[MAX_STEPPERS];
+  Pin sclPin;
+  uint8_t numPins;
 };
-#endif //SOFT_I2C_MANAGER
+#endif // SOFT_I2C_MANAGER
