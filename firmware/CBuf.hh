@@ -1,6 +1,8 @@
 #ifndef __CBUF_HH__
 #define __CBUF_HH__
 
+#include <avr/interrupt.h>
+
 ///
 /// Generalized simple circular buffer implementation
 ///
