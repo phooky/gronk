@@ -100,13 +100,19 @@ void start_state(SystemState newss) {
     }
 }
 
-bool handle_mcode() {
+typedef enum {
+    RC_OK,
+    RC_ERR,
+    RC_FULL,
+} ResultCode;
+
+ResultCode handle_mcode() {
     switch (cmd().cmdValue) {
         
     case 230:  // Enable character echo
     case 231:  // Disable character echo
         set_echo(cmd().cmdValue == 230);
-        return true;
+        return RC_OK;
 
     case 17:  // Enable selected steppers
     case 18:  // Disable selected steppers
@@ -121,17 +127,17 @@ bool handle_mcode() {
             if (all) // none specified, apply to all
                 for (int i = 0; i < 3; i++) steppers::enable(i, en);
         }
-        return true;
+        return RC_OK;
 
     default:
-        return false;
+        return RC_ERR;
     }
 }
 
-bool handle_gcode() {
+ResultCode handle_gcode() {
     switch (cmd().cmdValue) {
     default:
-        return false;
+        return RC_ERR;
     }
 }
 
@@ -169,12 +175,18 @@ int main() {
         wdt_reset();
         if (check_for_command()) {
             if (cmd().mode == BAD_CMD) {
-                UART::write_string("ERR");
+                UART::write_string("err [parse]");
             } else {
-                if (cmd().cmdCode == 'M') {
-                    handle_mcode();
-                } else {
-                    UART::write_string("IGN");
+                ResultCode result = RC_ERR;
+                switch (cmd().cmdCode) {
+                case 'M': result = handle_mcode(); break;
+                case 'G': result = handle_gcode(); break;
+                default: break; 
+                }
+                switch (result) {
+                case RC_OK: UART::write_string("ok"); break;
+                case RC_FULL: UART::write_string("full"); break;
+                case RC_ERR: UART::write_string("err"); break;
                 }
             }
             reset_command();
