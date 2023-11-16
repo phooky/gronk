@@ -136,6 +136,11 @@ ResultCode handle_mcode() {
 
 ResultCode handle_gcode() {
     switch (cmd().cmdValue) {
+    case 1:   // Linear move
+    case 0:   // Rapid move
+        if (!steppers::queue_ready()) return RC_FULL;
+        //steppers::enqueue_move(
+        return RC_ERR;
     default:
         return RC_ERR;
     }
