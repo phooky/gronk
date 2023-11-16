@@ -47,8 +47,10 @@ void finish_fp_parse() {
 bool check_for_command() {
     while (UART::available()) {
         uint8_t c = UART::read_byte();
-        if (echo)
+        if (echo) {
             UART::write(c);
+            if (c == '\r') UART::write('\n');
+        }
         bool end_of_command = (c == '\n' || c == '\r');
         // treat a command completion as if it had a trailing space
         // (this will complete any parameter scans)

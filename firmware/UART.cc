@@ -125,12 +125,16 @@ int write_buffer(uint8_t *buf, uint8_t length) {
 }
 
 /// Write a null-terminated string to the uart.
-int write_string(const char *str) {
+int write_string(const char *str, const bool nl) {
     int idx = 0;
     while (str[idx] != 0) {
         if (!write(str[idx]))
             return idx;
         idx++;
+    }
+    if (nl) {
+        write('\r');
+        write('\n');
     }
     return idx;
 }

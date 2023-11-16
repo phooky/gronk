@@ -182,6 +182,41 @@ void start_state(SystemState newss) {
     }
 }
 
+bool handle_mcode() {
+    switch (cmd().cmdValue) {
+        
+    case 230:  // Enable character echo
+    case 231:  // Disable character echo
+        set_echo(cmd().cmdValue == 230);
+        return true;
+
+    case 17:  // Enable selected steppers
+    case 18:  // Disable selected steppers
+        {
+            bool en = cmd().cmdValue == 17;
+            bool all = true;
+            for (int i = 0; i < 3; i++)
+                if (cmd().params[i].int_part() != 0) {
+                    steppers::enable(i, en);
+                    all = false;
+                }
+            if (all) // none specified, apply to all
+                for (int i = 0; i < 3; i++) steppers::enable(i, en);
+        }
+        return true;
+
+    default:
+        return false;
+    }
+}
+
+bool handle_gcode() {
+    switch (cmd().cmdValue) {
+    default:
+        return false;
+    }
+}
+
 int main() {
     INTERFACE_POWER.setDirection(true);
     INTERFACE_POWER.setValue(false);
@@ -213,27 +248,18 @@ int main() {
     start_state(SS_OFF);
 
     UART::initialize();
-    UART::write_string("Ready.\n");
+    UART::write_string("Ready.");
     while (1) {
         wdt_reset();
         if (check_for_command()) {
             if (cmd().mode == BAD_CMD) {
-                UART::write_string("ERR\n");
+                UART::write_string("ERR");
             } else {
                 if (cmd().cmdCode == 'M') {
-                    if (cmd().cmdValue == 17 ||
-                        cmd().cmdValue == 18) { // Enable/disable steppers
-                        for (int i = 0; i < 3; i++)
-                            if (cmd().params[i].int_part() != 0) {
-                                UART::write('X' + i);
-                                steppers::enable(i, cmd().cmdValue == 17);
-                            }
-                        UART::write_string(cmd().cmdValue == 17 ? "ENABLE\n"
-                                                                : "DISABLE\n");
-                    } else
-                        UART::write_string("Mcode not handled\n");
-                } else
-                    UART::write_string("IGN\n");
+                    handle_mcode();
+                } else {
+                    UART::write_string("IGN");
+                }
             }
             reset_command();
         }
