@@ -30,18 +30,18 @@ bool is_int(char c) { return (c >= '0') && (c <= '9'); }
 
 void reset_command() {
     for (int i = 0; i < PARAM_LAST; i++) {
-        command.params[i].reset();
+        command.params[i] = 0;
         command.mode = SCAN_FOR_CMD;
     }
     command.neg = false;
-    command.frac_val = 0x1999; // 1/10th
+    command.frac_val = 0.1;
 }
 
 void finish_fp_parse() {
     if (command.neg)
-        command.cp().negate();
+        command.cp() = -command.cp();
     command.neg = false;
-    command.frac_val = 0x1999; // 1/10th
+    command.frac_val = 0.1;
 }
 
 bool check_for_command() {
@@ -85,7 +85,7 @@ bool check_for_command() {
             if (c == '-')
                 command.neg = true;
             else if (c == ' ')
-                command.cp().int_part() = 1; // It's a flag, treat like a bool
+                command.cp() += 1; // It's a flag, treat like a bool
             command.mode = SCAN_FOR_CODE_INT;
         case SCAN_FOR_CODE_INT:
             if (c == '.')
@@ -93,8 +93,7 @@ bool check_for_command() {
             else if (c == ' ')
                 command.mode = SCAN_FOR_CODE;
             else if (is_int(c))
-                command.cp().int_part() =
-                    (command.cp().int_part() * 10) + (c - '0');
+                command.cp() = (command.cp() * 10) + (c - '0');
             else
                 command.mode = BAD_CMD;
             break;
@@ -103,7 +102,7 @@ bool check_for_command() {
                 finish_fp_parse();
                 command.mode = SCAN_FOR_CODE;
             } else if (is_int(c)) {
-                command.cp().frac_part() += (c - '0') * command.frac_val;
+                command.cp() += (c - '0') * command.frac_val;
                 command.frac_val /= 10;
             } else
                 command.mode = BAD_CMD;

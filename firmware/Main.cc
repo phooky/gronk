@@ -120,7 +120,7 @@ ResultCode handle_mcode() {
             bool en = cmd().cmdValue == 17;
             bool all = true;
             for (int i = 0; i < 3; i++)
-                if (cmd().params[i].int_part() != 0) {
+                if (cmd().params[i] != 0) {
                     steppers::enable(i, en);
                     all = false;
                 }
@@ -139,8 +139,8 @@ ResultCode handle_gcode() {
     case 1:   // Linear move
     case 0:   // Rapid move
         if (!steppers::queue_ready()) return RC_FULL;
-        //steppers::enqueue_move(
-        return RC_ERR;
+        steppers::enqueue_move(cmd().params[X], cmd().params[Y], cmd().params[F]);
+        return RC_OK;
     default:
         return RC_ERR;
     }

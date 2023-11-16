@@ -21,7 +21,6 @@
 #include "Configuration.hh"
 #include "Pin.hh"
 #include "Types.hh"
-#include "Fixed32.hh"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -35,7 +34,7 @@ void setPotValue(const Pin &pin, uint8_t val);
 /// Check if there's space on the movement queue for another move
 /// or dwell
 bool queue_ready();
-bool enqueue_move(Fixed32 x, Fixed32 y, Fixed32 feed);
+bool enqueue_move(float x, float y, float feed);
 bool enqueue_dwell(uint16_t milliseconds);
 
 void do_interrupt();

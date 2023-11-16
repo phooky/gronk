@@ -36,12 +36,11 @@ template <int N, typename T> class CBuf {
         return buf[data];
     }
     
-    T& dequeue() {
+    T dequeue() {
         if (empty())
-            return buf[0]; // Better than corruption; should check for empty
-                           // first
+            return T(); // Better than corruption; should check for empty first
         cli();
-        T &rv = buf[data];
+        T rv = buf[data];
         sz--;
         data = (data + 1) % blen;
         sei();

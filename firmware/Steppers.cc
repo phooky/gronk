@@ -23,6 +23,7 @@
 #include "CBuf.hh"
 #include "SoftI2cManager.hh"
 #include <stdint.h>
+#include <math.h>
 
 #define A_STEPPER_MIN NullPin
 #define A_STEPPER_MAX NullPin
@@ -40,13 +41,17 @@ extern int intdbg;
             axis##_STEPPER_MIN, axis##_STEPPER_MAX, axis##_POT_PIN             \
     }
 
+const float STEPS_PER_MM[2] = {
+    STEPS_PER_MM_X, STEPS_PER_MM_Y,
+};
+
 namespace steppers {
 
 class MovementCmd {
 public:
-    Fixed32 target[2]; // only handling X/Y, let's dump the rest
-    Fixed32 velocity;
-    MovementCmd(Fixed32 x, Fixed32 y, Fixed32 vel) : target{x,y}, velocity(vel) {}
+    float target[2]; // only handling X/Y, let's dump the rest
+    float velocity;
+    MovementCmd(float x, float y, float vel) : target{x,y}, velocity(vel) {}
 };
 
 class PenCmd {
@@ -72,18 +77,24 @@ public:
         DwellCmd dwell;
     };
     Command() : type(CT_NONE) {}
-    Command(Fixed32 x, Fixed32 y, Fixed32 vel) : type(CT_MOVE), move(MovementCmd(x,y,vel)) {}
+    Command(float x, float y, float vel) : type(CT_MOVE), move(MovementCmd(x,y,vel)) {}
 };
 
 CBuf<32, Command> cmd_q;
+Command cur_cmd = Command();
+float last_pos[2] = { 0,0 };
 
+
+/// Stepper internals
 typedef struct {
-    Fixed32 position;
+    int32_t position; // in steps
+    int32_t target; // in steps
     int16_t velocity;
-    int16_t acceleration;
+    int16_t acceleration; // ignore for the moment
 } StepAxisInfo;
 
 StepAxisInfo axis[MAX_STEPPERS];
+uint32_t cycles_remaining_in_command = 0;
 
 typedef struct {
     const Pin step;
@@ -122,14 +133,50 @@ const uint8_t STEP_BIT = 16;
 
 void reset_axes() {
     for (StepAxisInfo &a : axis) {
-        a.position.reset();
+        a.position = 0;
         a.velocity = 0;
         a.acceleration = 0;
     }
-    //for (Fixed32 &f : post_queue_pos)
-    //    f.reset();
 }
 
+void next_cmd() {
+    if (!cmd_q.empty()) {
+        cur_cmd = cmd_q.dequeue();
+    }
+    switch(cur_cmd.type) {
+    case CT_NONE:
+    case CT_PEN:
+    case CT_DWELL:
+        return;
+    case CT_MOVE:
+        {
+            float distance = 0;
+            for (int i = 0; i < 2; i++) {
+                float axis_d = cur_cmd.move.target[i] - last_pos[i];
+                distance += axis_d * axis_d;
+            }
+            distance = sqrt(distance);
+            // Velocity is ALWAYS IN MM/S
+            cycles_remaining_in_command =
+                (distance / cur_cmd.move.velocity) *  // time in seconds
+                STEPPER_FREQ;
+            for (int i = 0; i < 2; i++) {
+                auto& a = axis[i];
+                float axis_d_steps = (cur_cmd.move.target[i] - last_pos[i]) * STEPS_PER_MM[i];
+                a.velocity =
+                    (axis_d_steps / cycles_remaining_in_command) * // steps per cycle
+                    ((int32_t)1<<15);
+            }
+            for (int i = 0; i < 2; i++)
+                last_pos[i] = cur_cmd.move.target[i];
+            
+        }
+};
+
+    // TODO
+}
+
+    
 void init_pins() {
     for (const StepPins &pins : stepPins) {
         // Make sure each stepper is initialized in a disabled state.
@@ -163,7 +210,7 @@ void set_velocity(uint8_t which, int16_t velocity) {
 /// or dwell
 bool queue_ready() { return !cmd_q.full(); }
 
-bool enqueue_move(Fixed32 x, Fixed32 y, Fixed32 feedrate) {
+bool enqueue_move(float x, float y, float feedrate) {
     // Stepper loop frequency: 7812.5Hz
     cmd_q.queue(Command(x,y,feedrate));
     return true;
@@ -173,12 +220,18 @@ bool enqueue_dwell(uint16_t milliseconds) { return true; }
 
 void do_interrupt() {
     cli();
-    for (int i = 0; i < 2; i++) {
-        auto &a = axis[i];
-        const auto &p = stepPins[i];
-        p.dir.setValue(!(a.velocity & (1L << 15)));
-        a.position.v.v32 += a.velocity;
-        p.step.setValue(a.position.v.v32 & (1L << 15));
+    if (cycles_remaining_in_command == 0) {
+        next_cmd();
+    }
+    if (cycles_remaining_in_command > 0) {
+        for (int i = 0; i < 2; i++) {
+            auto &a = axis[i];
+            const auto &p = stepPins[i];
+            p.dir.setValue( a.velocity > 0 );
+            a.position += a.velocity;
+            p.step.setValue(a.position & (1L << 15));
+        }
+        cycles_remaining_in_command--;
     }
     sei();
 }

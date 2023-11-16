@@ -32,8 +32,10 @@
 */
 
 // Steps per MM. Right now we're guessing.
-const Fixed32 STEPS_PER_MM_X(20,0);
-const Fixed32 STEPS_PER_MM_Y(20,0);
+const float STEPS_PER_MM_X = 20;
+const float STEPS_PER_MM_Y = 20;
+
+const float STEPPER_FREQ =  7812.5; // stepper interrupts per second
 
 // microstepping is 1 / (1 << MICROSTEPPING)
 //  0 for 1/1
