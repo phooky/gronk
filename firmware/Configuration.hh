@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
+#include "Fixed32.hh"
 
 #ifndef BOARDS_MBV40_CONFIGURATION_HH_
 #define BOARDS_MBV40_CONFIGURATION_HH_
@@ -25,8 +26,14 @@
 #define MAX_STEPPERS 5
 #define EXTRUDERS 2
 
+/*
 #define XY_STEPS_PER_MM 88.888889
 #define Z_STEPS_PER_MM 400
+*/
+
+// Steps per MM. Right now we're guessing.
+const Fixed32 STEPS_PER_MM_X(20,0);
+const Fixed32 STEPS_PER_MM_Y(20,0);
 
 // microstepping is 1 / (1 << MICROSTEPPING)
 //  0 for 1/1

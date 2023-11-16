@@ -103,7 +103,7 @@ bool check_for_command() {
                 finish_fp_parse();
                 command.mode = SCAN_FOR_CODE;
             } else if (is_int(c)) {
-                command.cp().frac_part() += command.frac_val;
+                command.cp().frac_part() += (c - '0') * command.frac_val;
                 command.frac_val /= 10;
             } else
                 command.mode = BAD_CMD;

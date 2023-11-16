@@ -30,7 +30,13 @@ template <int N, typename T> class CBuf {
         return true;
     }
 
-    T &dequeue() {
+    T& last() {
+        if (empty()) return buf[0]; // Better than corruption
+        uint8_t off = (data + sz - 1) % blen;
+        return buf[data];
+    }
+    
+    T& dequeue() {
         if (empty())
             return buf[0]; // Better than corruption; should check for empty
                            // first
