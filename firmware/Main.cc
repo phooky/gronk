@@ -141,6 +141,9 @@ ResultCode handle_gcode() {
         if (!steppers::queue_ready()) return RC_FULL;
         steppers::enqueue_move(cmd().params[X], cmd().params[Y], cmd().params[F]);
         return RC_OK;
+    case 92:
+        steppers::reset_axes();
+        return RC_OK;
     default:
         return RC_ERR;
     }

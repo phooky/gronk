@@ -34,13 +34,14 @@ clean:
 
 ButtonArray.o: ButtonArray.hh Configuration.hh Fixed32.hh
 ButtonArray.o: /usr/include/stdint.h AvrPort.hh Pin.hh
-CommandParser.o: CommandParser.hh Fixed32.hh /usr/include/stdint.h UART.hh
+CommandParser.o: CommandParser.hh /usr/include/stdint.h UART.hh
 LiquidCrystalSerial.o: LiquidCrystalSerial.hh Configuration.hh Fixed32.hh
 LiquidCrystalSerial.o: /usr/include/stdint.h AvrPort.hh Pin.hh
 LiquidCrystalSerial.o: /usr/include/stdio.h /usr/include/string.h
-Main.o: ButtonArray.hh CommandParser.hh Fixed32.hh /usr/include/stdint.h
-Main.o: Configuration.hh AvrPort.hh LiquidCrystalSerial.hh Pin.hh RGB_LED.hh
-Main.o: Types.hh SoftI2cManager.hh Steppers.hh /usr/include/stdlib.h UART.hh
+Main.o: ButtonArray.hh CommandParser.hh /usr/include/stdint.h
+Main.o: Configuration.hh Fixed32.hh AvrPort.hh LiquidCrystalSerial.hh Pin.hh
+Main.o: RGB_LED.hh Types.hh SoftI2cManager.hh Steppers.hh
+Main.o: /usr/include/stdlib.h UART.hh
 Piezo.o: Piezo.hh CircularBuffer.hh /usr/include/stdint.h Pin.hh AvrPort.hh
 Piezo.o: Timeout.hh Types.hh Configuration.hh Fixed32.hh
 Pin.o: Pin.hh AvrPort.hh /usr/include/stdint.h
@@ -51,7 +52,7 @@ SoftI2cManager.o: SoftI2cManager.hh Configuration.hh Fixed32.hh
 SoftI2cManager.o: /usr/include/stdint.h AvrPort.hh Pin.hh
 Steppers.o: Steppers.hh Configuration.hh Fixed32.hh /usr/include/stdint.h
 Steppers.o: AvrPort.hh Pin.hh Types.hh /usr/include/stdlib.h CBuf.hh
-Steppers.o: SoftI2cManager.hh
+Steppers.o: SoftI2cManager.hh /usr/include/math.h
 Timeout.o: Timeout.hh Types.hh /usr/include/stdint.h Configuration.hh
 Timeout.o: Fixed32.hh AvrPort.hh
 UART.o: UART.hh /usr/include/stdint.h CBuf.hh Pin.hh AvrPort.hh

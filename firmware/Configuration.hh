@@ -31,9 +31,9 @@
 #define Z_STEPS_PER_MM 400
 */
 
-// Steps per MM. Right now we're guessing.
-const float STEPS_PER_MM_X = 20;
-const float STEPS_PER_MM_Y = 20;
+// Steps per mm (measured on GRONK)
+const float STEPS_PER_MM_X = 280;
+const float STEPS_PER_MM_Y = 160;
 
 const float STEPPER_FREQ =  7812.5; // stepper interrupts per second
 

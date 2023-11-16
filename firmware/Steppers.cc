@@ -137,11 +137,14 @@ void reset_axes() {
         a.velocity = 0;
         a.acceleration = 0;
     }
+    last_pos[0] = last_pos[1] = 0;
 }
 
 void next_cmd() {
     if (!cmd_q.empty()) {
         cur_cmd = cmd_q.dequeue();
+    } else {
+        cur_cmd = Command();
     }
     switch(cur_cmd.type) {
     case CT_NONE:
@@ -152,14 +155,16 @@ void next_cmd() {
         {
             float distance = 0;
             for (int i = 0; i < 2; i++) {
-                float axis_d = cur_cmd.move.target[i] - last_pos[i];
-                distance += axis_d * axis_d;
+                float axis_d = cur_cmd.move.target[i] - last_pos[i]; // distance on axis in mm
+                distance += axis_d * axis_d;                         // running total of distances squared
             }
-            distance = sqrt(distance);
-            // Velocity is ALWAYS IN MM/S
-            cycles_remaining_in_command =
+            distance = sqrt(distance); // square root of sum of squared = distance in mm
+
+            float cycles = 
                 (distance / cur_cmd.move.velocity) *  // time in seconds
-                STEPPER_FREQ;
+                (float)STEPPER_FREQ;
+            cycles_remaining_in_command = cycles; // commit to integer
+
             for (int i = 0; i < 2; i++) {
                 auto& a = axis[i];
                 float axis_d_steps = (cur_cmd.move.target[i] - last_pos[i]) * STEPS_PER_MM[i];

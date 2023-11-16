@@ -2,22 +2,24 @@
 
 Table of supported G codes
 
-| G-code | Meaning                      |
-|--------|------------------------------|
-| G0     | Ordinary movement            |
-| G1     | Fast travel                  |
-| G92    | Set current position as zero |
+| G-code | Meaning                      | Implemented |
+|--------|------------------------------|-------------|
+| G0     | Ordinary movement            | X           |
+| G1     | Fast travel                  | X           |
+| G92    | Set current position as zero | X           |
+|        |                              |             |
 
 Table of supported M codes
 
-| M-code          | Meaning                                          |
-|-----------------|--------------------------------------------------|
-| M03             | Plotter pen down                                 |
-| M04             | Plotter pen up                                   |
-| M17 [X] [Y] [Z] | Enable steppers. If none specified, enable all.  |
-| M18 [X] [Y] [Z] | Disable steppers. If none specified, enable all. |
-| M230            | Turn on command echoing.                         |
-| M231            | Turn off command echoing.                        |
+| M-code          | Meaning                                          | Implemented |
+|-----------------|--------------------------------------------------|-------------|
+| M03             | Plotter pen down                                 |             |
+| M04             | Plotter pen up                                   |             |
+| M17 [X] [Y] [Z] | Enable steppers. If none specified, enable all.  | X           |
+| M18 [X] [Y] [Z] | Disable steppers. If none specified, enable all. | X           |
+| M230            | Turn on command echoing.                         | X           |
+| M231            | Turn off command echoing.                        | X           |
+| M255            | Reset machine.                                   |             |
 
 
 
