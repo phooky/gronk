@@ -21,7 +21,6 @@
 #define __STDC_LIMIT_MACROS
 #include "Steppers.hh"
 #include "CBuf.hh"
-#include "Fixed32.hh"
 #include "SoftI2cManager.hh"
 #include <stdint.h>
 
@@ -43,16 +42,40 @@ extern int intdbg;
 
 namespace steppers {
 
-typedef struct {
-    struct {
-        int16_t vel;
-        int16_t acc;
-    } axis[3];
-    uint32_t ticks;
-} Move;
+class MovementCmd {
+public:
+    Fixed32 target[2]; // only handling X/Y, let's dump the rest
+    Fixed32 velocity;
+    MovementCmd(Fixed32 x, Fixed32 y, Fixed32 vel) : target{x,y}, velocity(vel) {}
+};
 
-CBuf<16, Move> moveq;
-Fixed32 post_queue_pos[3];
+class PenCmd {
+public:
+    bool up;
+};
+
+class DwellCmd {
+public:
+    uint16_t milliseconds;
+};
+
+typedef enum {
+    CT_NONE = 0, CT_MOVE, CT_PEN, CT_DWELL
+} CommandType;
+    
+class Command {
+public:
+    CommandType type;
+    union {
+        MovementCmd move;
+        PenCmd pen;
+        DwellCmd dwell;
+    };
+    Command() : type(CT_NONE) {}
+    Command(Fixed32 x, Fixed32 y, Fixed32 vel) : type(CT_MOVE), move(MovementCmd(x,y,vel)) {}
+};
+
+CBuf<32, Command> cmd_q;
 
 typedef struct {
     Fixed32 position;
@@ -103,8 +126,8 @@ void reset_axes() {
         a.velocity = 0;
         a.acceleration = 0;
     }
-    for (Fixed32 &f : post_queue_pos)
-        f.reset();
+    //for (Fixed32 &f : post_queue_pos)
+    //    f.reset();
 }
 
 void init_pins() {
@@ -138,15 +161,11 @@ void set_velocity(uint8_t which, int16_t velocity) {
 
 /// Check if there's space on the movement queue for another move
 /// or dwell
-bool queue_ready() { return !moveq.full(); }
+bool queue_ready() { return !cmd_q.full(); }
 
-bool enqueue_move(int32_t x, int32_t y, int32_t z, uint16_t feed) {
+bool enqueue_move(Fixed32 x, Fixed32 y, Fixed32 feedrate) {
     // Stepper loop frequency: 7812.5Hz
-    bool empty = moveq.empty();
-    x -= (empty ? axis[0].position : post_queue_pos[0]).v.v32;
-    y -= (empty ? axis[0].position : post_queue_pos[1]).v.v32;
-    z -= (empty ? axis[0].position : post_queue_pos[2]).v.v32;
-
+    cmd_q.queue(Command(x,y,feedrate));
     return true;
 }
 
