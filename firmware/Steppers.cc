@@ -89,8 +89,8 @@ float last_pos[2] = { 0,0 };
 typedef struct {
     int32_t position; // in steps
     int32_t target; // in steps
-    int16_t velocity;
-    int16_t acceleration; // ignore for the moment
+    int32_t velocity;
+    int32_t acceleration; // ignore for the moment
 } StepAxisInfo;
 
 StepAxisInfo axis[MAX_STEPPERS];
@@ -163,9 +163,10 @@ void next_cmd() {
             for (int i = 0; i < 2; i++) {
                 auto& a = axis[i];
                 float axis_d_steps = (cur_cmd.move.target[i] - last_pos[i]) * STEPS_PER_MM[i];
-                a.velocity =
+                float vel =
                     (axis_d_steps / cycles_remaining_in_command) * // steps per cycle
-                    ((int32_t)1<<15);
+                    (float)((int32_t)1<<15);
+                a.velocity = vel;
             }
             for (int i = 0; i < 2; i++)
                 last_pos[i] = cur_cmd.move.target[i];

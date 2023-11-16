@@ -73,7 +73,7 @@ bool check_for_command() {
             else
                 command.mode = BAD_CMD;
             break;
-        case SCAN_FOR_CODE:
+        case SCAN_FOR_CODE: // Parameter code (X, Y, Z, etc)
             if (c == ' ')
                 break;
             command.curParam = paramIdx(c);
@@ -82,17 +82,22 @@ bool check_for_command() {
                                : SCAN_FOR_CODE_FIRST;
             break;
         case SCAN_FOR_CODE_FIRST:
-            if (c == '-')
-                command.neg = true;
-            else if (c == ' ')
-                command.cp() += 1; // It's a flag, treat like a bool
             command.mode = SCAN_FOR_CODE_INT;
+            if (c == '-') {
+                command.neg = true;
+                break;
+            } else if (c == ' ') {
+                // There's a lot of uncertainty as to what to do here. I'll say treat as a flag.
+                command.cp() += 1; // It's a flag, treat like a bool
+            }
+            // deliberate fallthrough!!!!
         case SCAN_FOR_CODE_INT:
             if (c == '.')
                 command.mode = SCAN_FOR_CODE_FRAC;
-            else if (c == ' ')
+            else if (c == ' ') {
+                finish_fp_parse();
                 command.mode = SCAN_FOR_CODE;
-            else if (is_int(c))
+            } else if (is_int(c))
                 command.cp() = (command.cp() * 10) + (c - '0');
             else
                 command.mode = BAD_CMD;
