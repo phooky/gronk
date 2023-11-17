@@ -36,6 +36,11 @@ const float STEPS_PER_MM_X = 156;
 const float STEPS_PER_MM_Y = 156;
 
 const float STEPPER_FREQ =  10000; // stepper interrupts per second
+
+// Time to lift or lower a pen; about 1/10s
+const int32_t UP_CYCLES = 1000;
+const int32_t DOWN_CYCLES = 1000;
+
 //const float STEPPER_FREQ =  7812.5; // stepper interrupts per second
 
 // microstepping is 1 / (1 << MICROSTEPPING)

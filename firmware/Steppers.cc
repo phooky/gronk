@@ -202,7 +202,7 @@ bool enqueue_move(float x, float y, float feedrate) {
     return true;
 }
 
-bool enqueue_dwell(uint16_t milliseconds) {
+bool enqueue_dwell(float milliseconds) {
     MotionCmd cmd;
     cmd.type = MotionCmd::CmdType::DWELL;
     float cycles = (milliseconds/1000)*STEPPER_FREQ;
@@ -210,6 +210,16 @@ bool enqueue_dwell(uint16_t milliseconds) {
     motion_q.queue(cmd);
     return true;
 }
+
+bool enqueue_pen(bool up) {
+    MotionCmd cmd;
+    cmd.type = MotionCmd::CmdType::PEN;
+    cmd.time = up?UP_CYCLES:DOWN_CYCLES;
+    cmd.pen = up;
+    motion_q.queue(cmd);
+    return true;
+}
+
 //// COMMAND QUEUE END
 
 
