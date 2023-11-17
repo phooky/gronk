@@ -24,6 +24,9 @@ $(TARGET_HEX): $(TARGET_ELF)
 $(TARGET_ELF): $(OBJS)
 	/usr/bin/avr-gcc -mmcu=$(CPU) -Os -Wl,-Map,$(TARGET).map -Wl,--gc-sections -o $@ $^ -lm
 
+# if you need floats in printf
+#	/usr/bin/avr-gcc -mmcu=$(CPU) -Os -Wl,-u,vfprintf,-Map,$(TARGET).map -Wl,--gc-sections -o $@ $^ -lm -lprintf_flt
+
 upload: $(TARGET_HEX)
 	avrdude -F -p m1280 -P $(PORT) -c stk500v1 -b 57600 -U flash:w:$(TARGET_HEX)
 

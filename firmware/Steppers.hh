@@ -36,7 +36,7 @@ void setPotValue(const Pin &pin, uint8_t val);
 /// or dwell
 bool queue_ready();
 bool enqueue_move(float x, float y, float feed);
-bool enqueue_dwell(uint16_t milliseconds);
+bool enqueue_dwell(float milliseconds);
 bool enqueue_pen(bool up);
 
 void do_interrupt();

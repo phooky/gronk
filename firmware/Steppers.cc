@@ -24,6 +24,8 @@
 #include "SoftI2cManager.hh"
 #include <stdint.h>
 #include <math.h>
+#include "UART.hh"
+#include <stdio.h>
 
 #define A_STEPPER_MIN NullPin
 #define A_STEPPER_MAX NullPin
@@ -47,66 +49,51 @@ const float STEPS_PER_MM[2] = {
 
 namespace steppers {
 
+typedef int64_t Steps;
 
-//// COMMAND QUEUE
-
-class MovementCmd {
+//// How does motion work?
+////
+class MotionCmd {
 public:
-    float target[2]; // only handling X/Y, let's dump the rest
-    float velocity;
-    MovementCmd(float x, float y, float vel) : target{x,y}, velocity(vel) {}
-};
-
-class PenCmd {
-public:
-    bool up;
-};
-
-class DwellCmd {
-public:
-    uint16_t milliseconds;
-};
-
-typedef enum {
-    CT_NONE = 0, CT_MOVE, CT_PEN, CT_DWELL
-} CommandType;
-    
-class Command {
-public:
-    CommandType type;
+    enum CmdType { NONE, MOVE, DWELL, PEN };
+    CmdType type;
     union {
-        MovementCmd move;
-        PenCmd pen;
-        DwellCmd dwell;
+        struct {
+            Steps target[2];
+            int32_t velocity[2];
+            int32_t acceleration[2];
+        } move;
+        bool pen;
     };
-    Command() : type(CT_NONE) {}
-    Command(float x, float y, float vel) : type(CT_MOVE), move(MovementCmd(x,y,vel)) {}
+    uint32_t time;
+    MotionCmd() : type (CmdType::NONE) {}
 };
 
-CBuf<32, Command> cmd_q;
-Command cur_cmd = Command();
+CBuf<32,MotionCmd> motion_q;
+MotionCmd cur_cmd; // command currently being executed
 
-typedef float Point[2];
-Point last_pos = { 0,0 };
 
-/// Current motion state
-class MotionState {
-public:
-    int32_t current_steps_[2];
-    int32_t target_steps[2];
-};
+int64_t last_pos[2] = { 0,0 };
 
 /// Stepper internals
-typedef struct {
-    int32_t position; // in steps
+class StepAxisInfo {
+public:
+    Steps position; // in steps
     int32_t partial; // partial steps moved
-    int32_t target; // in steps
+    Steps target; // in steps
     int32_t velocity;
     int32_t acceleration; // ignore for the moment
-} StepAxisInfo;
+    StepAxisInfo() { reset(); }
+    void reset() {
+        position = 0;
+        partial = 0;
+        target = 0;
+        velocity = 0;
+        acceleration = 0;
+    }
+};
 
 StepAxisInfo axis[MAX_STEPPERS];
-uint32_t cycles_remaining_in_command = 0;
 
 typedef struct {
     const Pin step;
@@ -145,53 +132,9 @@ const uint8_t STEP_BIT = 16;
 
 void reset_axes() {
     for (StepAxisInfo &a : axis) {
-        a.position = 0;
-        a.velocity = 0;
-        a.acceleration = 0;
+        a.reset();
     }
     last_pos[0] = last_pos[1] = 0;
-}
-
-void next_cmd() {
-    if (!cmd_q.empty()) {
-        cur_cmd = cmd_q.dequeue();
-    } else {
-        cur_cmd = Command();
-    }
-    switch(cur_cmd.type) {
-    case CT_NONE:
-    case CT_PEN:
-    case CT_DWELL:
-        return;
-    case CT_MOVE:
-        {
-            float distance = 0;
-            for (int i = 0; i < 2; i++) {
-                float axis_d = cur_cmd.move.target[i] - last_pos[i]; // distance on axis in mm
-                distance += axis_d * axis_d;                         // running total of distances squared
-            }
-            distance = sqrt(distance); // square root of sum of squared = distance in mm
-
-            float cycles = 
-                (distance / cur_cmd.move.velocity) *  // time in seconds
-                (float)STEPPER_FREQ;
-            cycles_remaining_in_command = cycles; // commit to integer
-
-            for (int i = 0; i < 2; i++) {
-                auto& a = axis[i];
-                float axis_d_steps = (cur_cmd.move.target[i] - last_pos[i]) * STEPS_PER_MM[i];
-                float vel =
-                    (axis_d_steps / cycles_remaining_in_command) * // steps per cycle
-                    (float)((int32_t)1<<15);
-                a.velocity = vel;
-            }
-            for (int i = 0; i < 2; i++)
-                last_pos[i] = cur_cmd.move.target[i];
-            
-        }
-};
-
-    // TODO
 }
 
     
@@ -227,52 +170,79 @@ void set_velocity(uint8_t which, int16_t velocity) {
 //// COMMAND QUEUE STUFF START
 /// Check if there's space on the movement queue for another move
 /// or dwell
-bool queue_ready() { return !cmd_q.full(); }
+bool queue_ready() { return !motion_q.full(); }
 
 bool enqueue_move(float x, float y, float feedrate) {
-    cmd_q.queue(Command(x,y,feedrate));
+    int64_t pt[2] = {
+        (int64_t)(x * STEPS_PER_MM[0]),
+        (int64_t)(y * STEPS_PER_MM[1]),
+    };
+    int64_t delta[2] = { pt[0] - last_pos[0], pt[1] - last_pos[1] };
+    MotionCmd cmd;
+    cmd.type = MotionCmd::CmdType::MOVE;
+    // The feedrate conversion is a little painful, but whatever.
+    double d0 = (double)(delta[0]/STEPS_PER_MM[0]);
+    double d1 = (double)(delta[1]/STEPS_PER_MM[1]);
+    double distance = sqrt(d0*d0 + d1*d1); // distance in mm
+    double cycles = (distance / feedrate) * STEPPER_FREQ; // stepper interrupt count
+    cmd.time = cycles;
+    for (auto i = 0; i < 2; i++) {
+        cmd.move.target[i] = pt[i];
+        /// Constraint: the time is larger than the number of steps.
+        /// partials are 24 bits in a 32-bit variable.
+        cmd.move.velocity[i] = ((delta[i] * (1L<<24)) / (int64_t)cmd.time);
+        cmd.move.acceleration[i] = 0;
+        last_pos[i] = pt[i];
+        /*
+        char buf[120];
+        sprintf(buf,"%f %ld",(double)v,cmd.move.velocity[i]);
+        UART::write_string(buf);
+        */
+    }
+    motion_q.queue(cmd);
     return true;
 }
 
-bool enqueue_dwell(uint16_t milliseconds) { return true; }
+bool enqueue_dwell(uint16_t milliseconds) {
+    MotionCmd cmd;
+    cmd.type = MotionCmd::CmdType::DWELL;
+    float cycles = (milliseconds/1000)*STEPPER_FREQ;
+    cmd.time = cycles;
+    motion_q.queue(cmd);
+    return true;
+}
 //// COMMAND QUEUE END
 
 
-typedef int32_t Steps;
-
-//// How does motion work?
-////
-class MotionCmd {
-public:
-    enum CmdType { NONE, MOVE, DWELL, PEN };
-    union data {
-        struct {
-            Steps target[2];
-            int32_t velocity;
-            int32_t acceleration;
-        } move;
-        bool pen;
-        uint32_t time;
-    };
-};
-
-CBuf<16,MotionCmd> motion_q;
-
+void next_cmd() {
+    if (!motion_q.empty()) {
+        cur_cmd = motion_q.dequeue();
+    } else {
+        cur_cmd = MotionCmd(); // None
+    }
+    for (int i = 0; i < 2; i++) {
+        auto& a = axis[i];
+        if (cur_cmd.type == MotionCmd::CmdType::MOVE)
+            a.velocity = cur_cmd.move.velocity[i];
+        else
+            a.velocity = 0;
+    }
+}
 
 void do_interrupt() {
     cli();
-    if (cycles_remaining_in_command == 0) {
+    if (cur_cmd.time == 0) {
         next_cmd();
     }
-    if (cycles_remaining_in_command > 0) {
+    if (cur_cmd.time > 0 && cur_cmd.type == MotionCmd::CmdType::MOVE) {
         for (int i = 0; i < 2; i++) {
             auto &a = axis[i];
             const auto &p = stepPins[i];
-            p.dir.setValue( a.velocity > 0 );
-            a.position += a.velocity;
-            p.step.setValue(a.position & (1L << 15));
+            p.dir.setValue(cur_cmd.move.velocity[i] > 0 );
+            a.partial += a.velocity;
+            p.step.setValue(a.partial & (1L << 24));
         }
-        cycles_remaining_in_command--;
+        cur_cmd.time--;
     }
     sei();
 }
