@@ -47,6 +47,9 @@ const float STEPS_PER_MM[2] = {
 
 namespace steppers {
 
+
+//// COMMAND QUEUE
+
 class MovementCmd {
 public:
     float target[2]; // only handling X/Y, let's dump the rest
@@ -82,12 +85,21 @@ public:
 
 CBuf<32, Command> cmd_q;
 Command cur_cmd = Command();
-float last_pos[2] = { 0,0 };
 
+typedef float Point[2];
+Point last_pos = { 0,0 };
+
+/// Current motion state
+class MotionState {
+public:
+    int32_t current_steps_[2];
+    int32_t target_steps[2];
+};
 
 /// Stepper internals
 typedef struct {
     int32_t position; // in steps
+    int32_t partial; // partial steps moved
     int32_t target; // in steps
     int32_t velocity;
     int32_t acceleration; // ignore for the moment
@@ -212,17 +224,40 @@ void set_velocity(uint8_t which, int16_t velocity) {
     sei();
 }
 
+//// COMMAND QUEUE STUFF START
 /// Check if there's space on the movement queue for another move
 /// or dwell
 bool queue_ready() { return !cmd_q.full(); }
 
 bool enqueue_move(float x, float y, float feedrate) {
-    // Stepper loop frequency: 7812.5Hz
     cmd_q.queue(Command(x,y,feedrate));
     return true;
 }
 
 bool enqueue_dwell(uint16_t milliseconds) { return true; }
+//// COMMAND QUEUE END
+
+
+typedef int32_t Steps;
+
+//// How does motion work?
+////
+class MotionCmd {
+public:
+    enum CmdType { NONE, MOVE, DWELL, PEN };
+    union data {
+        struct {
+            Steps target[2];
+            int32_t velocity;
+            int32_t acceleration;
+        } move;
+        bool pen;
+        uint32_t time;
+    };
+};
+
+CBuf<16,MotionCmd> motion_q;
+
 
 void do_interrupt() {
     cli();

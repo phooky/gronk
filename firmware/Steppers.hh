@@ -25,6 +25,7 @@
 #include <stdlib.h>
 
 namespace steppers {
+
 enum { X, Y, Z, A, B };
 void reset_axes();
 void init();
@@ -36,6 +37,7 @@ void setPotValue(const Pin &pin, uint8_t val);
 bool queue_ready();
 bool enqueue_move(float x, float y, float feed);
 bool enqueue_dwell(uint16_t milliseconds);
+bool enqueue_pen(bool up);
 
 void do_interrupt();
 }; // namespace steppers
