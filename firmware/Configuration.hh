@@ -35,7 +35,8 @@
 const float STEPS_PER_MM_X = 156;
 const float STEPS_PER_MM_Y = 156;
 
-const float STEPPER_FREQ =  7812.5; // stepper interrupts per second
+const float STEPPER_FREQ =  10000; // stepper interrupts per second
+//const float STEPPER_FREQ =  7812.5; // stepper interrupts per second
 
 // microstepping is 1 / (1 << MICROSTEPPING)
 //  0 for 1/1

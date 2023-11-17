@@ -69,7 +69,7 @@ public:
     MotionCmd() : type (CmdType::NONE) {}
 };
 
-CBuf<32,MotionCmd> motion_q;
+CBuf<16,MotionCmd> motion_q;
 MotionCmd cur_cmd; // command currently being executed
 
 
@@ -193,11 +193,10 @@ bool enqueue_move(float x, float y, float feedrate) {
         cmd.move.velocity[i] = ((delta[i] * (1L<<24)) / (int64_t)cmd.time);
         cmd.move.acceleration[i] = 0;
         last_pos[i] = pt[i];
-        /*
-        char buf[120];
-        sprintf(buf,"%f %ld",(double)v,cmd.move.velocity[i]);
-        UART::write_string(buf);
-        */
+
+        //char buf[60];
+        //sprintf(buf,"%ld",cmd.time);
+        //UART::write_string(buf);
     }
     motion_q.queue(cmd);
     return true;
@@ -231,10 +230,9 @@ void next_cmd() {
 
 void do_interrupt() {
     cli();
-    if (cur_cmd.time == 0) {
+    if (cur_cmd.time == 0 || cur_cmd.type == MotionCmd::CmdType::NONE) {
         next_cmd();
-    }
-    if (cur_cmd.time > 0 && cur_cmd.type == MotionCmd::CmdType::MOVE) {
+    } else if (cur_cmd.time > 0) {
         for (int i = 0; i < 2; i++) {
             auto &a = axis[i];
             const auto &p = stepPins[i];

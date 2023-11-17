@@ -68,7 +68,9 @@ void init_timers() {
     /// WGM = 0100 -- CTC mode, count up from 0 to OCR5A and then reset to 0
     TCCR5A = 0x00;         // Output compare pins disabled, WGM1:0 = 00
     TCCR5B = 0x0A;         // 00001010 WGM3:2 = 01, CS = 010
-    OCR5A = 0x100;         // 16MHz / 8(prescale) / 256(OCR5A) == 7812.5Hz
+    OCR5A = 0x0c8;         // 16MHz / 8(prescale) / 200(OCR5A) == 10000Hz
+    //OCR5A = 0x080;         // 16MHz / 8(prescale) / 128(OCR5A) == 15625Hz
+    //OCR5A = 0x100;         // 16MHz / 8(prescale) / 256(OCR5A) == 7812.5Hz
     TIMSK5 |= 1 << OCIE5A; // turn on OCR5A match interrupt
 }
 

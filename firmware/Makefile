@@ -33,6 +33,9 @@ upload: $(TARGET_HEX)
 clean:
 	rm $(OBJS) $(TARGET_HEX) $(TARGET_ELF) $(TARGET_MAP)
 
+reset:
+	avrdude -p m1280 -P /dev/ttyACM0 -c stk500v1 -b 57600
+
 # DO NOT DELETE
 
 ButtonArray.o: ButtonArray.hh Configuration.hh Fixed32.hh
