@@ -87,8 +87,8 @@ void start_state(SystemState newss) {
     ss = newss;
     switch (ss) {
     case SS_OFF:
-        steppers::enable(0, false);
-        steppers::enable(1, false);
+        motion::enable(0, false);
+        motion::enable(1, false);
         RGB_LED::setCustomColor(0x10, 0x10, 0x99);
         lcd.clear();
         lcd.writeString("Steppers off.");
@@ -123,11 +123,11 @@ ResultCode handle_mcode() {
             bool all = true;
             for (int i = 0; i < 3; i++)
                 if (cmd().params[i] != 0) {
-                    steppers::enable(i, en);
+                    motion::enable(i, en);
                     all = false;
                 }
             if (all) // none specified, apply to all
-                for (int i = 0; i < 3; i++) steppers::enable(i, en);
+                for (int i = 0; i < 3; i++) motion::enable(i, en);
         }
         return RC_OK;
 
@@ -140,11 +140,11 @@ ResultCode handle_gcode() {
     switch (cmd().cmdValue) {
     case 1:   // Linear move
     case 0:   // Rapid move
-        if (!steppers::queue_ready()) return RC_FULL;
-        steppers::enqueue_move(cmd().params[X], cmd().params[Y], cmd().params[F]);
+        if (!motion::queue_ready()) return RC_FULL;
+        motion::enqueue_move(cmd().params[X], cmd().params[Y], cmd().params[F]);
         return RC_OK;
     case 92:
-        steppers::reset_axes();
+        motion::reset_axes();
         return RC_OK;
     default:
         return RC_ERR;
@@ -163,9 +163,9 @@ int main() {
     SoftI2cManager::getI2cManager().init();
 
     reset(true);
-    steppers::init();
-    steppers::setPotValue(X_POT_PIN, 40);
-    steppers::setPotValue(Y_POT_PIN, 80);
+    motion::init();
+    motion::setPotValue(X_POT_PIN, 40);
+    motion::setPotValue(Y_POT_PIN, 80);
     init_timers();
     sei();
     RGB_LED::init();
@@ -220,6 +220,6 @@ ISR(TIMER2_COMPA_vect) {}
 
 ISR(TIMER5_COMPA_vect) {
     // Handle stepper interrupt.
-    steppers::do_interrupt();
+    motion::do_interrupt();
     // intdbg++;
 }

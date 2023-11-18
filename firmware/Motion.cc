@@ -47,7 +47,7 @@ const float STEPS_PER_MM[2] = {
     STEPS_PER_MM_X, STEPS_PER_MM_Y,
 };
 
-namespace steppers {
+namespace motion {
 
 typedef int64_t Steps;
 
@@ -257,4 +257,4 @@ void do_interrupt() {
     }
     sei();
 }
-}; // namespace steppers
+}; // namespace motion

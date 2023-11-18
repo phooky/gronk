@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef STEPPERS_HH_
-#define STEPPERS_HH_
+#ifndef MOTION_HH_
+#define MOTION_HH_
 
 #include "Configuration.hh"
 #include "Pin.hh"
@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-namespace steppers {
+namespace motion {
 
 enum { X, Y, Z, A, B };
 void reset_axes();
@@ -40,6 +40,6 @@ bool enqueue_dwell(float milliseconds);
 bool enqueue_pen(bool up);
 
 void do_interrupt();
-}; // namespace steppers
+}; // namespace motion
 
-#endif // STEPPERS_HH_
+#endif // MOTION_HH_
