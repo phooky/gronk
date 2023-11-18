@@ -19,6 +19,7 @@
  */
 
 #include "Piezo.hh"
+#include "CBuf.hh"
 #include "Configuration.hh"
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -49,17 +50,13 @@ namespace Piezo {
 // Union used for mapping a combined 2 x uint16_t value into a uint32_t value
 // for storage in the circular buffer
 struct tone {
-    union {
-        uint32_t tone_entry;   // Place holder for referencing
-        uint16_t tone_data[2]; // index 0 is frequency, index 1 is duration
-    };
+    uint16_t tone_data[2]; // index 0 is frequency, index 1 is duration
 };
 
 // Setup the tone buffer
 const static uint8_t TONE_QUEUE_SIZE = 20;
 
-uint32_t tones_buf[TONE_QUEUE_SIZE];
-CircularBuffer32 tones(TONE_QUEUE_SIZE, tones_buf);
+CBuf<20,struct tone> tones;
 
 static bool soundEnabled = false;
 static bool playing = false;
@@ -108,7 +105,7 @@ void shutdown_timer(void) {
 // or stops the timer if the buffer is empty
 
 void processNextTone(void) {
-    if (tones.isEmpty()) {
+    if (tones.empty()) {
         piezoTimeout.clear();
         playing = false;
 
@@ -118,9 +115,7 @@ void processNextTone(void) {
         playing = true;
 
         // Get the next tone from the buffer
-        struct tone tone;
-
-        tone.tone_entry = tones.pop();
+        struct tone tone = tones.dequeue();
 
         // Schedule the end of tone.  Duration is in ms, timer is in uS, so
         // we multiply by 1000
@@ -224,13 +219,13 @@ void setTone(uint16_t frequency, uint16_t duration) {
         return;
 
     // Add the tone to the buffer
-    if (tones.getRemainingCapacity()) {
+    if (!tones.full()) {
         struct tone tone;
 
         tone.tone_data[FREQUENCY] = frequency;
         tone.tone_data[DURATION] = duration;
 
-        tones.push(tone.tone_entry);
+        tones.push(tone);
     }
 
     // If we're not playing tones, then we schedule the tone we just put in the

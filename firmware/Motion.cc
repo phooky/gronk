@@ -19,7 +19,7 @@
  */
 
 #define __STDC_LIMIT_MACROS
-#include "Steppers.hh"
+#include "Motion.hh"
 #include "CBuf.hh"
 #include "SoftI2cManager.hh"
 #include <stdint.h>
@@ -51,8 +51,8 @@ namespace steppers {
 
 typedef int64_t Steps;
 
-//// How does motion work?
-////
+/// Motion commands for the command queue.
+
 class MotionCmd {
 public:
     enum CmdType { NONE, MOVE, DWELL, PEN };
@@ -75,7 +75,6 @@ MotionCmd cur_cmd; // command currently being executed
 
 int64_t last_pos[2] = { 0,0 };
 
-/// Stepper internals
 class StepAxisInfo {
 public:
     Steps position; // in steps
@@ -243,12 +242,16 @@ void do_interrupt() {
     if (cur_cmd.time == 0 || cur_cmd.type == MotionCmd::CmdType::NONE) {
         next_cmd();
     } else if (cur_cmd.time > 0) {
-        for (int i = 0; i < 2; i++) {
-            auto &a = axis[i];
-            const auto &p = stepPins[i];
-            p.dir.setValue(cur_cmd.move.velocity[i] > 0 );
-            a.partial += a.velocity;
-            p.step.setValue(a.partial & (1L << 24));
+        if (cur_cmd.type == MotionCmd::CmdType::MOVE) {
+            for (int i = 0; i < 2; i++) {
+                auto &a = axis[i];
+                const auto &p = stepPins[i];
+                p.dir.setValue(cur_cmd.move.velocity[i] > 0 );
+                a.partial += a.velocity;
+                p.step.setValue(a.partial & (1L << 24));
+            }
+        } else if (cur_cmd.type == MotionCmd::CmdType::PEN) {
+            // Do pen raise/lower
         }
         cur_cmd.time--;
     }

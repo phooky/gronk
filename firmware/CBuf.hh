@@ -46,6 +46,8 @@ template <int N, typename T> class CBuf {
         sei();
         return rv;
     }
+
+    void reset() { data = 0; sz = 0; }
 };
 
 #endif

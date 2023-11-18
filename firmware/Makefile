@@ -12,7 +12,7 @@ TARGET_HEX=$(TARGET).hex
 TARGET_MAP=$(TARGET).map
 
 OBJS=Main.o Pin.o SoftI2cManager.o TWI.o RGB_LED.o \
-	LiquidCrystalSerial.o ButtonArray.o Steppers.o \
+	LiquidCrystalSerial.o ButtonArray.o Motion.o \
 	UART.o CommandParser.o
 
 %.o: %.cc
@@ -46,8 +46,11 @@ LiquidCrystalSerial.o: /usr/include/stdint.h AvrPort.hh Pin.hh
 LiquidCrystalSerial.o: /usr/include/stdio.h /usr/include/string.h
 Main.o: ButtonArray.hh CommandParser.hh /usr/include/stdint.h
 Main.o: Configuration.hh Fixed32.hh AvrPort.hh LiquidCrystalSerial.hh Pin.hh
-Main.o: RGB_LED.hh Types.hh SoftI2cManager.hh Steppers.hh
-Main.o: /usr/include/stdlib.h UART.hh
+Main.o: RGB_LED.hh Types.hh SoftI2cManager.hh Motion.hh /usr/include/stdlib.h
+Main.o: UART.hh
+Motion.o: Motion.hh Configuration.hh Fixed32.hh /usr/include/stdint.h
+Motion.o: AvrPort.hh Pin.hh Types.hh /usr/include/stdlib.h CBuf.hh
+Motion.o: SoftI2cManager.hh /usr/include/math.h UART.hh /usr/include/stdio.h
 Piezo.o: Piezo.hh CircularBuffer.hh /usr/include/stdint.h Pin.hh AvrPort.hh
 Piezo.o: Timeout.hh Types.hh Configuration.hh Fixed32.hh
 Pin.o: Pin.hh AvrPort.hh /usr/include/stdint.h
@@ -56,9 +59,6 @@ RGB_LED.o: RGB_LED.hh Types.hh /usr/include/stdint.h Configuration.hh
 RGB_LED.o: Fixed32.hh AvrPort.hh Pin.hh TWI.hh
 SoftI2cManager.o: SoftI2cManager.hh Configuration.hh Fixed32.hh
 SoftI2cManager.o: /usr/include/stdint.h AvrPort.hh Pin.hh
-Steppers.o: Steppers.hh Configuration.hh Fixed32.hh /usr/include/stdint.h
-Steppers.o: AvrPort.hh Pin.hh Types.hh /usr/include/stdlib.h CBuf.hh
-Steppers.o: SoftI2cManager.hh /usr/include/math.h
 Timeout.o: Timeout.hh Types.hh /usr/include/stdint.h Configuration.hh
 Timeout.o: Fixed32.hh AvrPort.hh
 UART.o: UART.hh /usr/include/stdint.h CBuf.hh Pin.hh AvrPort.hh

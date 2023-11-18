@@ -22,7 +22,7 @@
 #include "Pin.hh"
 #include "RGB_LED.hh"
 #include "SoftI2cManager.hh"
-#include "Steppers.hh"
+#include "Motion.hh"
 #include "UART.hh"
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
