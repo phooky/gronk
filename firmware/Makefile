@@ -51,14 +51,10 @@ Main.o: UART.hh
 Motion.o: Motion.hh Configuration.hh Fixed32.hh /usr/include/stdint.h
 Motion.o: AvrPort.hh Pin.hh Types.hh /usr/include/stdlib.h CBuf.hh
 Motion.o: SoftI2cManager.hh /usr/include/math.h UART.hh /usr/include/stdio.h
-Piezo.o: Piezo.hh CircularBuffer.hh /usr/include/stdint.h Pin.hh AvrPort.hh
-Piezo.o: Timeout.hh Types.hh Configuration.hh Fixed32.hh
 Pin.o: Pin.hh AvrPort.hh /usr/include/stdint.h
 PSU.o: PSU.hh Pin.hh AvrPort.hh /usr/include/stdint.h
 RGB_LED.o: RGB_LED.hh Types.hh /usr/include/stdint.h Configuration.hh
 RGB_LED.o: Fixed32.hh AvrPort.hh Pin.hh TWI.hh
 SoftI2cManager.o: SoftI2cManager.hh Configuration.hh Fixed32.hh
 SoftI2cManager.o: /usr/include/stdint.h AvrPort.hh Pin.hh
-Timeout.o: Timeout.hh Types.hh /usr/include/stdint.h Configuration.hh
-Timeout.o: Fixed32.hh AvrPort.hh
 UART.o: UART.hh /usr/include/stdint.h CBuf.hh Pin.hh AvrPort.hh
