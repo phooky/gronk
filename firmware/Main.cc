@@ -45,13 +45,6 @@ void reset(bool hard_reset) {
     }
 }
 
-typedef enum {
-    SS_GCODE,
-    SS_OFF,
-} SystemState;
-
-SystemState ss = SS_OFF;
-
 void init_timers() {
     // NB: Timer2 is unused, this is just nonsense for now
     // TIMER 2: microseconds, LED flasher, etc.
@@ -76,31 +69,6 @@ void init_timers() {
 
 int intdbg = 0;
 LiquidCrystalSerial lcd(LCD_STROBE, LCD_DATA, LCD_CLK);
-
-void start_state(SystemState newss) {
-    // shutdown previous mode
-    switch (ss) {
-    default:
-        break;
-    }
-    // Set current mode
-    ss = newss;
-    switch (ss) {
-    case SS_OFF:
-        motion::enable(0, false);
-        motion::enable(1, false);
-        RGB_LED::setCustomColor(0x10, 0x10, 0x99);
-        lcd.clear();
-        lcd.writeString("Steppers off.");
-        lcd.setCursor(0, 1);
-        lcd.writeString("Press center button to");
-        lcd.setCursor(0, 2);
-        lcd.writeString("turn on joystick control.");
-        break;
-    case SS_GCODE:
-        break;
-    }
-}
 
 typedef enum {
     RC_OK,
@@ -177,7 +145,6 @@ int main() {
     lcd.clear();
     lcd.home();
     lcd.setCursor(0, 0);
-    start_state(SS_OFF);
 
     UART::initialize();
     UART::write_string("Ready.");
@@ -202,16 +169,11 @@ int main() {
             reset_command();
         }
         _delay_ms(50);
+        /*
+          example of button scan call, we're not using the UI right now
         ButtonArray::scan();
         if (ButtonArray::pressed() & CENTER)
-            switch (ss) {
-            case SS_GCODE:
-                start_state(SS_OFF);
-                break;
-            case SS_OFF:
-                start_state(SS_GCODE);
-                break;
-            }
+        */
     }
     return 0;
 }
