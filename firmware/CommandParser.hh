@@ -11,7 +11,7 @@ typedef enum {
     CMD_READY,
 } ScanMode;
 
-enum { X = 0, Y = 1, Z = 2, F = 3, S = 4, PARAM_LAST };
+enum { X = 0, Y = 1, Z = 2, F = 3, S = 4, P = 5, PARAM_LAST };
 
 typedef struct {
     float params[PARAM_LAST];

@@ -241,17 +241,19 @@ void do_interrupt() {
     cli();
     if (cur_cmd.time == 0 || cur_cmd.type == MotionCmd::CmdType::NONE) {
         next_cmd();
-    } else if (cur_cmd.time > 0) {
-        if (cur_cmd.type == MotionCmd::CmdType::MOVE) {
-            for (int i = 0; i < 2; i++) {
-                auto &a = axis[i];
-                const auto &p = stepPins[i];
-                p.dir.setValue(cur_cmd.move.velocity[i] > 0 );
-                a.partial += a.velocity;
-                p.step.setValue(a.partial & (1L << 24));
+    } else {
+        if (cur_cmd.time > 0) {
+            if (cur_cmd.type == MotionCmd::CmdType::MOVE) {
+                for (int i = 0; i < 2; i++) {
+                    auto &a = axis[i];
+                    const auto &p = stepPins[i];
+                    p.dir.setValue(cur_cmd.move.velocity[i] > 0 );
+                    a.partial += a.velocity;
+                    p.step.setValue(a.partial & (1L << 24));
+                }
+            } else if (cur_cmd.type == MotionCmd::CmdType::PEN) {
+                // Do pen raise/lower
             }
-        } else if (cur_cmd.type == MotionCmd::CmdType::PEN) {
-            // Do pen raise/lower
         }
         cur_cmd.time--;
     }

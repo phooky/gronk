@@ -21,6 +21,8 @@ uint8_t paramIdx(char code) {
         return F;
     case 'S':
         return S;
+    case 'P':
+        return P;
     default:
         return PARAM_LAST;
     }
@@ -31,8 +33,8 @@ bool is_int(char c) { return (c >= '0') && (c <= '9'); }
 void reset_command() {
     for (int i = 0; i < PARAM_LAST; i++) {
         command.params[i] = 0;
-        command.mode = SCAN_FOR_CMD;
     }
+    command.mode = SCAN_FOR_CMD;
     command.neg = false;
     command.frac_val = 0.1;
 }

@@ -2,12 +2,13 @@
 
 Table of supported G codes
 
-| G-code | Meaning                      | Implemented |
-|--------|------------------------------|-------------|
-| G0     | Ordinary movement            | X           |
-| G1     | Fast travel                  | X           |
-| G92    | Set current position as zero | X           |
-|        |                              |             |
+| G-code | Meaning                      | Implemented | Notes                         |
+|--------|------------------------------|-------------|-------------------------------|
+| G00    | Ordinary movement            | X           |                               |
+| G01    | Fast travel                  | X           |                               |
+| G04    | Dwell                        |             | P parameter is *ALWAYS* in ms |
+| G92    | Set current position as zero | X           |                               |
+
 
 Table of supported M codes
 
