@@ -111,6 +111,10 @@ ResultCode handle_gcode() {
         if (!motion::queue_ready()) return RC_FULL;
         motion::enqueue_move(cmd().params[X], cmd().params[Y], cmd().params[F]);
         return RC_OK;
+    case 4:   // Dwell
+        if (!motion::queue_ready()) return RC_FULL;
+        motion::enqueue_dwell(cmd().params[P]);
+        return RC_OK;
     case 92:
         motion::reset_axes();
         return RC_OK;
