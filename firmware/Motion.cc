@@ -69,7 +69,7 @@ public:
     MotionCmd() : type (CmdType::NONE) {}
 };
 
-CBuf<16,MotionCmd> motion_q;
+CBuf<32,MotionCmd> motion_q;
 MotionCmd cur_cmd; // command currently being executed
 
 
