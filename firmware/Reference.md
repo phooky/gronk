@@ -15,8 +15,8 @@ Table of supported M codes
 
 | M-code          | Meaning                                          | Implemented | Tested |
 |-----------------|--------------------------------------------------|-------------|--------|
-| M03             | Plotter pen down                                 |             |        |
-| M04             | Plotter pen up                                   |             |        |
+| M03             | Plotter pen down                                 | X           |        |
+| M04             | Plotter pen up                                   | X           |        |
 | M17 [X] [Y] [Z] | Enable steppers. If none specified, enable all.  | X           | X      |
 | M18 [X] [Y] [Z] | Disable steppers. If none specified, enable all. | X           | X      |
 | M230            | Turn on command echoing.                         | X           | X      |

@@ -148,6 +148,12 @@ void init_pins() {
         pins.dir.setValue(true);
         pins.dir.setDirection(true);
     }
+    PEN_IN_A.setValue(false);
+    PEN_IN_A.setDirection(true);
+    PEN_IN_B.setValue(false);
+    PEN_IN_B.setDirection(true);
+    PEN_PWM.setValue(true);
+    PEN_PWM.setDirection(true);
 }
 
 void init() {
@@ -235,6 +241,15 @@ void next_cmd() {
         else
             a.velocity = 0;
     }
+    if (cur_cmd.type == MotionCmd::CmdType::PEN) {
+        PEN_IN_A.setValue(cur_cmd.pen);
+        PEN_IN_B.setValue(!cur_cmd.pen);
+        if (cur_cmd.pen) {
+            UART::write_string("PEN up");
+        } else {
+            UART::write_string("PEN down");
+        }
+   }
 }
 
 void do_interrupt() {

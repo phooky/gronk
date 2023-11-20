@@ -101,6 +101,12 @@ const int32_t DOWN_CYCLES = 1000;
 // The pin that drives the buzzer
 #define BUZZER_PIN Pin(PortH, 3) // OC4A
 
+// --- Pen solenoid h-bridge configuration ---
+
+#define PEN_PWM Pin(PortB, 7)
+#define PEN_IN_A Pin(PortF, 0)
+#define PEN_IN_B Pin(PortF, 1)
+
 // --- Stepper and endstop configuration ---
 // Pins should be defined for each axis present on the board.  They are denoted
 // X, Y, Z, A and B respectively.
@@ -158,14 +164,14 @@ const int32_t DOWN_CYCLES = 1000;
 
 // --- Debugging configuration ---
 // The pin which controls the debug LED (active high)
-#define DEBUG_PIN Pin(PortB, 7)
+// #define DEBUG_PIN Pin(PortB, 7) // NOW USED FOR PWN ON SOLENOID
 // Additional Debug Pins
 #define DEBUG_PIN1 Pin(PortG, 4)
 #define DEBUG_PIN2 Pin(PortG, 3)
 #define DEBUG_PIN3 Pin(PortH, 7)
-#define DEBUG_PIN4 Pin(PortF, 0) // ADC0
-#define DEBUG_PIN5 Pin(PortF, 1) // ADC1
-#define DEBUG_PIN6 Pin(PortF, 2) // ADC2
+//#define DEBUG_PIN4 Pin(PortF, 0) // ADC0 // NOW USED FOR INA ON SOLENOID
+//#define DEBUG_PIN5 Pin(PortF, 1) // ADC1 // NOW USED FOR INB ON SOLENOID
+//#define DEBUG_PIN6 Pin(PortF, 2) // ADC2 
 
 /// Analog pins for reading digipot output (VREF Pins)
 #define XVREF_Pin NULL

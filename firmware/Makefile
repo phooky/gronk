@@ -37,7 +37,7 @@ reset:
 	avrdude -p m1280 -P /dev/ttyACM0 -c stk500v1 -b 57600
 
 # local test program
-test:
+test: parser_test/test.cc CommandParser.cc
 	g++ -o test -I . parser_test/test.cc CommandParser.cc
 
 # DO NOT DELETE

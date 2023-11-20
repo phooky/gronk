@@ -78,7 +78,10 @@ typedef enum {
 
 ResultCode handle_mcode() {
     switch (cmd().cmdValue) {
-        
+    case 3: // Plotter pen down
+    case 4: // Plotter pen up
+        motion::enqueue_pen(cmd().cmdValue == 4);
+        return RC_OK;
     case 230:  // Enable character echo
     case 231:  // Disable character echo
         set_echo(cmd().cmdValue == 230);

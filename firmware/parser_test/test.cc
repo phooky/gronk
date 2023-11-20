@@ -59,9 +59,12 @@ void enable(bool enabled) {}
 } // namespace UART
 
 int main() {
-    UART::set_test_string("G00 X10 P5 Y10 F20\n\r");
+    UART::set_test_string("G00X10 P5 Y10 F20\n\r");
     if (check_for_command()) {
-        std::cout << "x "<< cmd().params[X] << " p " << cmd().params[P] << " code "<<cmd().cmdCode;
-        std::cout << cmd().cmdValue << " ok" << std::endl;
+        if (cmd().mode == BAD_CMD) { std::cout << "Could not parse" << std::endl; }
+        else {
+            std::cout << "x "<< cmd().params[X] << " p " << cmd().params[P] << " code "<<cmd().cmdCode;
+            std::cout << cmd().cmdValue << " ok" << std::endl;
+        }
     }
 }

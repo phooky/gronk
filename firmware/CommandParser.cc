@@ -68,13 +68,12 @@ bool check_for_command() {
                 command.mode = BAD_CMD;
             break;
         case SCAN_FOR_CMD_PARAM:
-            if (c == ' ')
-                command.mode = SCAN_FOR_CODE;
-            else if (is_int(c))
+            if (is_int(c)) {
                 command.cmdValue = (command.cmdValue * 10) + (c - '0');
-            else
-                command.mode = BAD_CMD;
-            break;
+                break;
+            } else {
+                command.mode = SCAN_FOR_CODE;
+            }
         case SCAN_FOR_CODE: // Parameter code (X, Y, Z, etc)
             if (c == ' ')
                 break;
