@@ -46,6 +46,7 @@ void reset(bool hard_reset) {
 }
 
 void init_timers() {
+    /*
     // NB: Timer2 is unused, this is just nonsense for now
     // TIMER 2: microseconds, LED flasher, etc.
     // Reset and configure timer 2, the microsecond timer, advance_timer and
@@ -55,7 +56,18 @@ void init_timers() {
     OCR2A = 25;    // Generate interrupts 16MHz / 64 / 25 = 10KHz
     OCR2B = 0;
     TIMSK2 |= 1 << OCIE2A; // turn on OCR2A match interrupt
-
+    */
+    /// TIMER 0: PWM output for the solenoid driver.
+    /// The driver operates at a maximum of 10kHz, so the frequency much be below
+    /// that.
+    /// The PWM pin is on PB7/OC0A. 
+    /// COM0A = 10 -- Non-inverting mode for "fast" PWM
+    /// WGM = 011 -- Fast PWM mode, top is 0xFF
+    /// CS = 011 -- CLK/8, gives us ~1kHz
+    TCCR0A = 0x83;
+    TCCR1A = 0x03;
+    OCR0A = 0; // PWM strength!
+    
     /// TIMER 5: stepper interupts. Currently running at 7.8KHz.
     /// CS = 010   -- prescaler is CLK/8
     /// WGM = 0100 -- CTC mode, count up from 0 to OCR5A and then reset to 0

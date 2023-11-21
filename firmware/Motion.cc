@@ -152,7 +152,8 @@ void init_pins() {
     PEN_IN_A.setDirection(true);
     PEN_IN_B.setValue(false);
     PEN_IN_B.setDirection(true);
-    PEN_PWM.setValue(true);
+    //PEN_PWM.setValue(true);
+    // This is being used as OC0A
     PEN_PWM.setDirection(true);
 }
 
@@ -244,11 +245,14 @@ void next_cmd() {
     if (cur_cmd.type == MotionCmd::CmdType::PEN) {
         PEN_IN_A.setValue(cur_cmd.pen);
         PEN_IN_B.setValue(!cur_cmd.pen);
+        // SET PWM HERE
+        /*
         if (cur_cmd.pen) {
             UART::write_string("PEN up");
         } else {
             UART::write_string("PEN down");
         }
+        */
    }
 }
 
