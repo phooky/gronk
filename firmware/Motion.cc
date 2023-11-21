@@ -230,6 +230,13 @@ bool enqueue_pen(bool up) {
 
 
 void next_cmd() {
+    // set pen back to idle power if previous motion was pen up/pen down
+    if (cur_cmd.type == MotionCmd::CmdType::PEN) {
+        if (cur_cmd.pen)
+            OCR0A = UP_IDLE_POWER;
+        else
+            OCR0A = DOWN_IDLE_POWER;
+    }
     if (!motion_q.empty()) {
         cur_cmd = motion_q.dequeue();
     } else {
@@ -245,6 +252,12 @@ void next_cmd() {
     if (cur_cmd.type == MotionCmd::CmdType::PEN) {
         PEN_IN_A.setValue(cur_cmd.pen);
         PEN_IN_B.setValue(!cur_cmd.pen);
+        if (cur_cmd.pen) {
+            OCR0A = UP_MOVEMENT_POWER;
+        } else {
+            OCR0A = DOWN_MOVEMENT_POWER;
+        }
+            
         // SET PWM HERE
         /*
         if (cur_cmd.pen) {
