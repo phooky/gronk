@@ -37,14 +37,17 @@ const float STEPS_PER_MM_Y = 156;
 
 const float STEPPER_FREQ =  10000; // stepper interrupts per second
 
-// Time to lift or lower a pen; about 1/10s
-const int32_t UP_CYCLES = 1000;
-const int32_t DOWN_CYCLES = 1000;
+// Time to lift or lower a pen in cycles
+const int32_t UP_CYCLES = 200;
+const int32_t DOWN_CYCLES = 200;
 
+/*
+  We're not PWMing that solenoid. Augh, my ears.
 const int8_t UP_MOVEMENT_POWER = 160;
 const int8_t DOWN_MOVEMENT_POWER = 250;
 const int8_t UP_IDLE_POWER = 30;
 const int8_t DOWN_IDLE_POWER = 100;
+*/
 
 //const float STEPPER_FREQ =  7812.5; // stepper interrupts per second
 

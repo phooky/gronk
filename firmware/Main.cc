@@ -57,6 +57,9 @@ void init_timers() {
     OCR2B = 0;
     TIMSK2 |= 1 << OCIE2A; // turn on OCR2A match interrupt
     */
+    /*
+      HA HA I don't need to PWM this, it's bistable, I can just shut
+      it off. Also, SCREEEEEEE
     /// TIMER 0: PWM output for the solenoid driver.
     /// The driver operates at a maximum of 10kHz, so the frequency much be below
     /// that.
@@ -64,9 +67,10 @@ void init_timers() {
     /// COM0A = 10 -- Non-inverting mode for "fast" PWM
     /// WGM = 011 -- Fast PWM mode, top is 0xFF
     /// CS = 011 -- CLK/8, gives us ~1kHz
-    TCCR0A = 0x83;
-    TCCR1A = 0x03;
-    OCR0A = 0; // PWM strength!
+    //TCCR0A = 0x83;
+    //TCCR0B = 0x03;
+    //OCR0A = 0; // PWM strength!
+    */
     
     /// TIMER 5: stepper interupts. Currently running at 7.8KHz.
     /// CS = 010   -- prescaler is CLK/8

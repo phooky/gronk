@@ -152,7 +152,7 @@ void init_pins() {
     PEN_IN_A.setDirection(true);
     PEN_IN_B.setValue(false);
     PEN_IN_B.setDirection(true);
-    //PEN_PWM.setValue(true);
+    PEN_PWM.setValue(true);
     // This is being used as OC0A
     PEN_PWM.setDirection(true);
 }
@@ -232,10 +232,13 @@ bool enqueue_pen(bool up) {
 void next_cmd() {
     // set pen back to idle power if previous motion was pen up/pen down
     if (cur_cmd.type == MotionCmd::CmdType::PEN) {
-        if (cur_cmd.pen)
-            OCR0A = UP_IDLE_POWER;
-        else
-            OCR0A = DOWN_IDLE_POWER;
+        if (cur_cmd.pen) {
+            //OCR0A = UP_IDLE_POWER;
+            PEN_PWM.setValue(0);
+        } else {
+            //OCR0A = DOWN_IDLE_POWER;
+            PEN_PWM.setValue(1);
+        }
     }
     if (!motion_q.empty()) {
         cur_cmd = motion_q.dequeue();
@@ -253,9 +256,12 @@ void next_cmd() {
         PEN_IN_A.setValue(cur_cmd.pen);
         PEN_IN_B.setValue(!cur_cmd.pen);
         if (cur_cmd.pen) {
-            OCR0A = UP_MOVEMENT_POWER;
+            //OCR0A = UP_MOVEMENT_POWER;
+            PEN_PWM.setValue(1);
         } else {
-            OCR0A = DOWN_MOVEMENT_POWER;
+            //OCR0A = DOWN_MOVEMENT_POWER;
+            //PEN_PWM.setValue(1M);
+            PEN_PWM.setValue(1);
         }
             
         // SET PWM HERE
