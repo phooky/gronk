@@ -46,32 +46,6 @@ void reset(bool hard_reset) {
 }
 
 void init_timers() {
-    /*
-    // NB: Timer2 is unused, this is just nonsense for now
-    // TIMER 2: microseconds, LED flasher, etc.
-    // Reset and configure timer 2, the microsecond timer, advance_timer and
-    // debug LED flasher timer.
-    TCCR2A = 0x02; // Output compare pins disabled, WGM1:0 = 10
-    TCCR2B = 0x04; // 00000100 WGM3:2 = 0, CS = 100
-    OCR2A = 25;    // Generate interrupts 16MHz / 64 / 25 = 10KHz
-    OCR2B = 0;
-    TIMSK2 |= 1 << OCIE2A; // turn on OCR2A match interrupt
-    */
-    /*
-      HA HA I don't need to PWM this, it's bistable, I can just shut
-      it off. Also, SCREEEEEEE
-    /// TIMER 0: PWM output for the solenoid driver.
-    /// The driver operates at a maximum of 10kHz, so the frequency much be below
-    /// that.
-    /// The PWM pin is on PB7/OC0A. 
-    /// COM0A = 10 -- Non-inverting mode for "fast" PWM
-    /// WGM = 011 -- Fast PWM mode, top is 0xFF
-    /// CS = 011 -- CLK/8, gives us ~1kHz
-    //TCCR0A = 0x83;
-    //TCCR0B = 0x03;
-    //OCR0A = 0; // PWM strength!
-    */
-    
     /// TIMER 5: stepper interupts. Currently running at 7.8KHz.
     /// CS = 010   -- prescaler is CLK/8
     /// WGM = 0100 -- CTC mode, count up from 0 to OCR5A and then reset to 0
@@ -96,7 +70,7 @@ ResultCode handle_mcode() {
     switch (cmd().cmdValue) {
     case 3: // Plotter pen down
     case 4: // Plotter pen up
-        motion::enqueue_pen(cmd().cmdValue == 4);
+        motion::enqueue_pen(cmd().cmdValue == 4); // M4 is up
         return RC_OK;
     case 230:  // Enable character echo
     case 231:  // Disable character echo

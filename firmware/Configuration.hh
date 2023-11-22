@@ -38,16 +38,8 @@ const float STEPS_PER_MM_Y = 156;
 const float STEPPER_FREQ =  10000; // stepper interrupts per second
 
 // Time to lift or lower a pen in cycles
-const int32_t UP_CYCLES = 200;
-const int32_t DOWN_CYCLES = 200;
-
-/*
-  We're not PWMing that solenoid. Augh, my ears.
-const int8_t UP_MOVEMENT_POWER = 160;
-const int8_t DOWN_MOVEMENT_POWER = 250;
-const int8_t UP_IDLE_POWER = 30;
-const int8_t DOWN_IDLE_POWER = 100;
-*/
+const int32_t UP_CYCLES = 60;
+const int32_t DOWN_CYCLES = 100;
 
 //const float STEPPER_FREQ =  7812.5; // stepper interrupts per second
 
@@ -110,7 +102,8 @@ const int8_t DOWN_IDLE_POWER = 100;
 #define BUZZER_PIN Pin(PortH, 3) // OC4A
 
 // --- Pen solenoid h-bridge configuration ---
-
+// Note: the PWM output goes to the h-bridge's PWM port and is used as an enable.
+// We are not PWMing the toolhead.
 #define PEN_PWM Pin(PortB, 7)
 #define PEN_IN_A Pin(PortF, 0)
 #define PEN_IN_B Pin(PortF, 1)
