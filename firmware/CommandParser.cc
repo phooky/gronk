@@ -34,6 +34,8 @@ void reset_command() {
     for (int i = 0; i < PARAM_LAST; i++) {
         command.params[i] = 0;
     }
+    command.cmdCode = 0;
+    command.cmdValue = 0;
     command.mode = SCAN_FOR_CMD;
     command.neg = false;
     command.frac_val = 0.1;
@@ -58,6 +60,7 @@ bool check_for_command() {
         // (this will complete any parameter scans)
         if (end_of_command)
             c = ' ';
+        if (c == ';') command.mode = SCAN_COMMENT;
         switch (command.mode) {
         case SCAN_FOR_CMD:
             if (c == 'G' || c == 'M') {

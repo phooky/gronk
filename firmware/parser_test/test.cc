@@ -58,13 +58,24 @@ void enable(bool enabled) {}
 
 } // namespace UART
 
-int main() {
-    UART::set_test_string("G00X10 P5 Y10 F20\n\r");
-    if (check_for_command()) {
-        if (cmd().mode == BAD_CMD) { std::cout << "Could not parse" << std::endl; }
-        else {
-            std::cout << "x "<< cmd().params[X] << " p " << cmd().params[P] << " code "<<cmd().cmdCode;
-            std::cout << cmd().cmdValue << " ok" << std::endl;
-        }
+
+void run_test(const string s) {
+    reset_command();
+    UART::set_test_string(s);
+    std::cout << s << " --> ";
+    if (!check_for_command()) {
+        std::cout << "unfinished" << std::endl;
+    } else if (cmd().mode == BAD_CMD) {
+        std::cout << "error" << std::endl;
+    } else {
+        std::cout << "command " << cmd().cmdCode << " -- " << (int)cmd().cmdValue << std::endl;
     }
+}
+
+int main() {
+    run_test("G00X10 P5 Y10 F20\n\r");
+    run_test("G02X10 P5 Y10 F20\n\r");
+    run_test("G02X10 P5 Y10 F20 ; end comment\n\r");
+    run_test("; just comment \n\r");
+    run_test("G02 X10P5Y10F20\n\r");
 }

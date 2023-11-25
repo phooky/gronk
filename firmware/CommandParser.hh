@@ -7,6 +7,7 @@ typedef enum {
     SCAN_FOR_CODE_FIRST,
     SCAN_FOR_CODE_INT,
     SCAN_FOR_CODE_FRAC,
+    SCAN_COMMENT,
     BAD_CMD,
     CMD_READY,
 } ScanMode;
