@@ -48,6 +48,8 @@ void finish_fp_parse() {
     command.frac_val = 0.1;
 }
 
+bool process_byte(uint8_t c);
+
 bool check_for_command() {
     while (UART::available()) {
         uint8_t c = UART::read_byte();
@@ -55,71 +57,75 @@ bool check_for_command() {
             UART::write(c);
             if (c == '\r') UART::write('\n');
         }
-        bool end_of_command = (c == '\n' || c == '\r');
-        // treat a command completion as if it had a trailing space
-        // (this will complete any parameter scans)
-        if (end_of_command)
-            c = ' ';
-        if (c == ';') command.mode = SCAN_COMMENT;
-        switch (command.mode) {
-        case SCAN_FOR_CMD:
-            if (c == 'G' || c == 'M') {
-                command.cmdCode = c;
-                command.mode = SCAN_FOR_CMD_PARAM;
-                command.cmdValue = 0;
-            } else
-                command.mode = BAD_CMD;
-            break;
-        case SCAN_FOR_CMD_PARAM:
-            if (is_int(c)) {
-                command.cmdValue = (command.cmdValue * 10) + (c - '0');
-                break;
-            } else {
-                command.mode = SCAN_FOR_CODE;
-            }
-        case SCAN_FOR_CODE: // Parameter code (X, Y, Z, etc)
-            if (c == ' ')
-                break;
-            command.curParam = paramIdx(c);
-            command.mode = (command.curParam == PARAM_LAST)
-                               ? BAD_CMD
-                               : SCAN_FOR_CODE_FIRST;
-            break;
-        case SCAN_FOR_CODE_FIRST:
-            command.mode = SCAN_FOR_CODE_INT;
-            if (c == '-') {
-                command.neg = true;
-                break;
-            } else if (c == ' ') {
-                // There's a lot of uncertainty as to what to do here. I'll say treat as a flag.
-                command.cp() += 1; // It's a flag, treat like a bool
-            }
-            // deliberate fallthrough!!!!
-        case SCAN_FOR_CODE_INT:
-            if (c == '.')
-                command.mode = SCAN_FOR_CODE_FRAC;
-            else if (c == ' ') {
-                finish_fp_parse();
-                command.mode = SCAN_FOR_CODE;
-            } else if (is_int(c))
-                command.cp() = (command.cp() * 10) + (c - '0');
-            else
-                command.mode = BAD_CMD;
-            break;
-        case SCAN_FOR_CODE_FRAC:
-            if (c == ' ') {
-                finish_fp_parse();
-                command.mode = SCAN_FOR_CODE;
-            } else if (is_int(c)) {
-                command.cp() += (c - '0') * command.frac_val;
-                command.frac_val /= 10;
-            } else
-                command.mode = BAD_CMD;
-        default:
-            break;
-        }
-        if (end_of_command)
+        if (process_byte(c)) {
             return true;
+        }
+    }
+    return false;
+}
+
+bool process_byte(uint8_t c) {
+    if (c == '\n' || c == '\r') {
+        // End of command.
+        finish_fp_parse(); // complete any in-process parsing
+        return true;
+    }
+    if (c == ' ' || c == '\t') {
+        return false; // spaces are always ignored in gcodes
+    }
+    if (c == ';') command.mode = SCAN_COMMENT;
+
+    if (command.mode == SCAN_FOR_CMD) {
+        if (c == 'G' || c == 'M') {
+            command.cmdCode = c;
+            command.mode = SCAN_FOR_CMD_PARAM;
+            command.cmdValue = 0;
+        } else
+            command.mode = BAD_CMD;
+        return false;
+    }
+
+    if (command.mode == SCAN_FOR_CMD_PARAM) {
+        if (is_int(c)) {
+            command.cmdValue = (command.cmdValue * 10) + (c - '0');
+            return false;
+        } else {
+            command.mode = SCAN_FOR_CODE;
+        }
+    }
+    if (command.mode == SCAN_FOR_CODE_FIRST) {
+        command.mode = SCAN_FOR_CODE_INT;
+        if (c == '-') {
+            command.neg = true;
+            return false;
+        }
+    }
+    if (command.mode == SCAN_FOR_CODE_INT) {
+        if (c == '.') {
+            command.mode = SCAN_FOR_CODE_FRAC;
+            return false;
+        }
+        if (is_int(c)) {
+            command.cp() = (command.cp() * 10) + (c - '0');
+            return false;
+        }
+        finish_fp_parse();
+        command.mode = SCAN_FOR_CODE;
+    }
+    if (command.mode ==  SCAN_FOR_CODE_FRAC) {
+        if (is_int(c)) {
+            command.cp() += (c - '0') * command.frac_val;
+            command.frac_val /= 10;
+            return false;
+        }
+        finish_fp_parse();
+        command.mode = SCAN_FOR_CODE;
+    }
+    if (command.mode == SCAN_FOR_CODE) {
+        command.curParam = paramIdx(c);
+        command.mode = (command.curParam == PARAM_LAST)
+            ? BAD_CMD
+            : SCAN_FOR_CODE_FIRST;
     }
     return false;
 }
