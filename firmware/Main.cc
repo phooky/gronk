@@ -67,20 +67,21 @@ typedef enum {
 } ResultCode;
 
 ResultCode handle_mcode() {
-    switch (cmd().cmdValue) {
+    const uint8_t v = cmd().code().value;
+    switch (v) {
     case 3: // Plotter pen down
     case 4: // Plotter pen up
-        motion::enqueue_pen(cmd().cmdValue == 4); // M4 is up
+        motion::enqueue_pen(v == 4); // M4 is up
         return RC_OK;
     case 230:  // Enable character echo
     case 231:  // Disable character echo
-        set_echo(cmd().cmdValue == 230);
+        set_echo(v == 230);
         return RC_OK;
 
     case 17:  // Enable selected steppers
     case 18:  // Disable selected steppers
         {
-            bool en = cmd().cmdValue == 17;
+            bool en = v == 17;
             bool all = true;
             for (int i = 0; i < 3; i++)
                 if (cmd().params[i] != 0) {
@@ -98,7 +99,8 @@ ResultCode handle_mcode() {
 }
 
 ResultCode handle_gcode() {
-    switch (cmd().cmdValue) {
+    const uint8_t v = cmd().code().value;
+    switch (v) {
     case 1:   // Linear move
     case 0:   // Rapid move
         if (!motion::queue_ready()) return RC_FULL;
@@ -152,7 +154,7 @@ int main() {
                 UART::write_string("err [parse]");
             } else {
                 ResultCode result = RC_ERR;
-                switch (cmd().cmdCode) {
+                switch (cmd().code().code) {
                 case 'M': result = handle_mcode(); break;
                 case 'G': result = handle_gcode(); break;
                 default: break; 

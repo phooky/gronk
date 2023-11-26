@@ -10,22 +10,36 @@ typedef enum {
     SCAN_COMMENT,
     BAD_CMD,
     CMD_READY,
-} ScanMode;
+} ParseState;
 
 enum { X = 0, Y = 1, Z = 2, F = 3, S = 4, P = 5, PARAM_LAST };
+uint8_t paramIdx(char code);
+
+class CommandCode {
+public:
+    char code;
+    uint8_t value;
+    CommandCode() : code(0), value(0) {}
+};
 
 class Command {
 public:
     float params[PARAM_LAST];
-    char cmdCode;
-    uint8_t cmdValue;
+    CommandCode cc;
     uint8_t curParam;
-    ScanMode mode;
+    uint8_t param_flags;
+    ParseState mode;
     // FP state
     float frac_val;
     bool neg;
     // convenience fns
     float &cp() { return params[curParam]; }
+    bool process_byte(uint8_t c);
+    void finish_fp_parse();
+public:
+    bool has_param(uint8_t which) { return (param_flags & (1 << which)) != 0; }
+    const float& operator[] (uint8_t which) { return params[which]; }
+    const CommandCode& code() { return cc; }
     void reset();
 };
 

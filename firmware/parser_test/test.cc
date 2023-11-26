@@ -59,17 +59,27 @@ void enable(bool enabled) {}
 } // namespace UART
 
 
+const char codes[] = { 'X', 'Y', 'Z', 'P', 'S', 'F' };
+
 void run_test(const string s) {
     cmd().reset();
     UART::set_test_string(s);
-    std::cout << s << " --> ";
+    std::cout << s;
     if (!check_for_command()) {
         std::cout << "unfinished" << std::endl;
     } else if (cmd().mode == BAD_CMD) {
         std::cout << "error" << std::endl;
     } else {
-        std::cout << "command " << cmd().cmdCode << " -- " << (int)cmd().cmdValue << std::endl;
+        std::cout << "command " << cmd().code().code << (int)cmd().code().value << std::endl;
+        for (const char& code : codes) {
+            uint8_t idx = paramIdx(code);
+            if (cmd().has_param(idx)) {
+                std::cout << "parameter " << code << " = " << cmd()[idx] << std::endl;
+            }
+        }
+
     }
+    std::cout << " --- --- --- " << std::endl;
 }
 
 int main() {
