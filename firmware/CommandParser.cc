@@ -30,15 +30,15 @@ uint8_t paramIdx(char code) {
 
 bool is_int(char c) { return (c >= '0') && (c <= '9'); }
 
-void reset_command() {
+void Command::reset() {
     for (int i = 0; i < PARAM_LAST; i++) {
-        command.params[i] = 0;
+        params[i] = 0;
     }
-    command.cmdCode = 0;
-    command.cmdValue = 0;
-    command.mode = SCAN_FOR_CMD;
-    command.neg = false;
-    command.frac_val = 0.1;
+    cmdCode = 0;
+    cmdValue = 0;
+    mode = SCAN_FOR_CMD;
+    neg = false;
+    frac_val = 0.1;
 }
 
 void finish_fp_parse() {

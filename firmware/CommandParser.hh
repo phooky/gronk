@@ -14,7 +14,8 @@ typedef enum {
 
 enum { X = 0, Y = 1, Z = 2, F = 3, S = 4, P = 5, PARAM_LAST };
 
-typedef struct {
+class Command {
+public:
     float params[PARAM_LAST];
     char cmdCode;
     uint8_t cmdValue;
@@ -25,9 +26,9 @@ typedef struct {
     bool neg;
     // convenience fns
     float &cp() { return params[curParam]; }
-} Command;
+    void reset();
+};
 
 bool check_for_command();
-void reset_command();
 Command &cmd();
 void set_echo(bool);

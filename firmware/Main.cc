@@ -163,7 +163,7 @@ int main() {
                 case RC_ERR: UART::write_string("err"); break;
                 }
             }
-            reset_command();
+            cmd().reset();
         }
         _delay_ms(50);
         /*

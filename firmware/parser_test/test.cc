@@ -60,7 +60,7 @@ void enable(bool enabled) {}
 
 
 void run_test(const string s) {
-    reset_command();
+    cmd().reset();
     UART::set_test_string(s);
     std::cout << s << " --> ";
     if (!check_for_command()) {
