@@ -23,7 +23,7 @@ public:
 };
 
 class Command {
-public:
+private:
     float params[PARAM_LAST];
     CommandCode cc;
     uint8_t curParam;
@@ -34,12 +34,13 @@ public:
     bool neg;
     // convenience fns
     float &cp() { return params[curParam]; }
-    bool process_byte(uint8_t c);
     void finish_fp_parse();
 public:
     bool has_param(uint8_t which) { return (param_flags & (1 << which)) != 0; }
     const float& operator[] (uint8_t which) { return params[which]; }
     const CommandCode& code() { return cc; }
+    bool process_byte(uint8_t c);
+    bool is_ok() { return mode != BAD_CMD; }
     void reset();
 };
 

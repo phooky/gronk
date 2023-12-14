@@ -67,7 +67,7 @@ void run_test(const string s) {
     std::cout << s;
     if (!check_for_command()) {
         std::cout << "unfinished" << std::endl;
-    } else if (cmd().mode == BAD_CMD) {
+    } else if (!cmd().is_ok()) {
         std::cout << "error" << std::endl;
     } else {
         std::cout << "command " << cmd().code().code << (int)cmd().code().value << std::endl;

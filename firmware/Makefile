@@ -62,3 +62,4 @@ RGB_LED.o: Fixed32.hh AvrPort.hh Pin.hh TWI.hh
 SoftI2cManager.o: SoftI2cManager.hh Configuration.hh Fixed32.hh
 SoftI2cManager.o: /usr/include/stdint.h AvrPort.hh Pin.hh
 UART.o: UART.hh /usr/include/stdint.h CBuf.hh Pin.hh AvrPort.hh
+parser_test/test.o: UART.hh /usr/include/stdint.h CommandParser.hh

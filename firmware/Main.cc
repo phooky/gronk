@@ -84,7 +84,7 @@ ResultCode handle_mcode() {
             bool en = v == 17;
             bool all = true;
             for (int i = 0; i < 3; i++)
-                if (cmd().params[i] != 0) {
+                if (cmd()[i] != 0) {
                     motion::enable(i, en);
                     all = false;
                 }
@@ -104,11 +104,11 @@ ResultCode handle_gcode() {
     case 1:   // Linear move
     case 0:   // Rapid move
         if (!motion::queue_ready()) return RC_FULL;
-        motion::enqueue_move(cmd().params[X], cmd().params[Y], cmd().params[F]);
+        motion::enqueue_move(cmd()[X], cmd()[Y], cmd()[F]);
         return RC_OK;
     case 4:   // Dwell
         if (!motion::queue_ready()) return RC_FULL;
-        motion::enqueue_dwell(cmd().params[P]);
+        motion::enqueue_dwell(cmd()[P]);
         return RC_OK;
     case 92:
         motion::reset_axes();
@@ -150,7 +150,7 @@ int main() {
     while (1) {
         wdt_reset();
         if (check_for_command()) {
-            if (cmd().mode == BAD_CMD) {
+            if (!cmd().is_ok()) {
                 UART::write_string("err [parse]");
             } else {
                 ResultCode result = RC_ERR;
