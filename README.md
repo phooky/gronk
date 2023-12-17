@@ -68,6 +68,8 @@ All commands to GRONK should be terminated with a newline. GRONK will
 immediately return a newline-terminated string that begins with one of
 the following:
 
+| code | meaning                                                                         |
+|------|---------------------------------------------------------------------------------|
 | ok   | the command has been processed and accepted.                                    |
 | full | the movement queue is full and the command has been discarded; wait and resend. |
 | err  | there is an error or unrecognized command.                                      |
