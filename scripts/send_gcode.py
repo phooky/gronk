@@ -2,11 +2,13 @@
 
 import serial
 import argparse
+import time
 
 parser = argparse.ArgumentParser(
     prog = 'send_gcode.py',
     description = 'Send a GCode file to Gronk.')
 parser.add_argument('-P', '--port', default='/dev/ttyACM0')
+parser.add_argument('-v', '--verbose', action='store_true')
 parser.add_argument('filename',metavar='FILE',nargs='+')
 
 args = parser.parse_args()
@@ -30,14 +32,24 @@ while True:
 class GCodeError(Exception):
     pass
 
+lineno = 0
+
 def send_to_gronk(line):
+    global lineno
+    lineno += 1
+    delay = False
     while True:
         data = line.strip().encode('ascii')+b'\n'
         s.write(data)
         rsp = s.readline().strip()
         if rsp == b'ok':
+            if delay and args.verbose:
+                print("resent.")
             return
         elif rsp == b'full':
+            if not delay and args.verbose:
+                print("full, trying resend...")
+                delay = True
             time.sleep(0.05)
         elif rsp[:3] == b'err':
             raise GCodeError(line + "(" + rsp.decode('utf-8')+")")
@@ -48,4 +60,5 @@ for filename in args.filename:
     f = open(filename)
     for line in f.readlines():
         send_to_gronk(line)
-    
+
+s.flush()
