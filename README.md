@@ -20,17 +20,25 @@ full-step stepper drivers.
 2. Connect the USB cable on the left side to your computer; GRONK will
    appear as a USB serial port. Connect to it at 115200 baud.
 3. Load paper and pen.
-3. Send G-Code commands to GRONK by either:
-    1. Connecting directly with a terminal emulator and trying out
-       gcode commands manually. (Be sure to issue the M230 command to
-       turn on echo mode, so you can see what you're typing, and be
-       aware that the steppers will be disabled at startup and will
-       need to be enabled before the steppers will move!)
-    2. Use one of the python scripts in the "scripts" directory to
-       send a prepared gcode file or generated commands.
-
+3. Send G-Code commands to GRONK using the `send_gcode.py` script in
+   the `scripts` directory. You'll need to provide the name of the
+   file you want to print and, depending on the platform, the name of
+   the port that GRONK appeared as. For example, you can run the
+   `star.gcode` script on Linux with the command line
+   `./send_gcode.py -P /dev/ttyACM0 star.gcode`.
+   
+Details below.
 
 ## Setting up GRONK
+
+### Requirements
+
+You'll need a computer or other device that can talk to a USB serial
+device. If you plan to use the included python scripts, make sure you
+have installed python and the pyserial library. (On a Debian-derived
+box you may want to install pyserial system-wide, if it's not there
+already, with `apt install python3-serial`; on all other systems if
+pip is installed you can just do `pip install pyserial`.)
 
 ### Powering up
 
@@ -51,7 +59,12 @@ insert and align your paper, and then lower them. **Note:** some of
 the levers have broken off. You can still raise and lower them by
 carefully rotating the parts they were attached to.
 
-### Connecting to GRONK
+### Loading a pen
+
+To be documented. We need to measure the dimensions and suggested
+stick-out of the pen holder!
+
+### Connecting your computer to GRONK
 
 GRONK uses a USB serial connection clocked at 115200 baud. To connect,
 find the USB cable that emerges from the machine on the *right* side
@@ -81,35 +94,60 @@ will reset the microcontroller and put it in programming mode. This is
 a common case for many Arduino-derived projects. If you accidentally
 put GRONK in programming mode, disconnect and reconnect the USB cable.
 
+### GRONK's default state
+
+When GRONK turns on, it should default to:
+
+| Setting  | Value    |
+|----------|----------|
+| Echo     | OFF      |
+| Steppers | DISABLED |
+| Position | 0,0      |
+
+You will need to issue an M17 command to turn on the steppers before
+anything will move.
+
 ## GCode Reference
 
-Table of supported G codes
+GCode is a very old format for sending commands to CNC machines. Each
+line consists of a G-code or M-code command, followed by a number of
+parameter codes. The X and Y parameters are always in mm. The
+feedrate, F, is in mm/s.
 
-| G-code | Meaning                      | Implemented | Tested | Notes |
-|--------|------------------------------|-------------|--------|-------|
-| G00    | Ordinary movement            | X           | X      |       |
-| G01    | Fast travel                  | X           | X      |       |
-| G04    | Dwell                        | X           |        | [^1]  |
-| G92    | Set current position as zero | X           | X      |       |
+G-codes usually pertain to movement, and M-codes generally are for
+everything else.
 
-[^1] P parameter is *ALWAYS* in ms
+| G-code | Meaning                      | Example         | Explanation                               |
+|--------|------------------------------|-----------------|-------------------------------------------|
+| G00    | Ordinary movement            | G00 X10 Y20 F30 | Move to (10,20) at a speed of 30mm/s [^1] |
+| G01    | Fast travel                  | G01 X10 Y20 F30 | Same as above [^1]                        |
+| G04    | Dwell                        | G04 P20         | Pause for 20ms [^2]                       |
+| G92    | Set current position as zero | G92             | Set current location as (0,0)             |
+
+
+[^1] At present, the feedrate parameter is always required. In the
+future there will be reasonable defaults for G0 and G1; for now
+they're identical.
+[^2] P parameter is *ALWAYS* in ms
 
 Table of supported M codes
 
-| M-code      | Meaning                                          | Implemented | Tested |
-|-------------|--------------------------------------------------|-------------|--------|
-| M03         | Plotter pen down                                 | X           | X      |
-| M04         | Plotter pen up                                   | X           | X      |
-| M17 [X] [Y] | Enable steppers. If none specified, enable all.  | X           | X      |
-| M18 [X] [Y] | Disable steppers. If none specified, enable all. | X           | X      |
-| M230        | Turn on command echoing.                         | X           | X      |
-| M231        | Turn off command echoing.                        | X           | X      |
-| M255        | Reset machine.                                   |             |        |
+| M-code      | Meaning                                          |
+|-------------|--------------------------------------------------|
+| M03         | Plotter pen down                                 |
+| M04         | Plotter pen up                                   |
+| M17 [X] [Y] | Enable steppers. If none specified, enable all.  |
+| M18 [X] [Y] | Disable steppers. If none specified, enable all. |
+| M230        | Turn on command echoing.                         |
+| M231        | Turn off command echoing.                        |
+| M255        | Reset machine. [^3]                              |
 
+[^3] Not yet implemented.
 
 ## TODO
 
 There's still a little work to do on GRONK.
+* support sending input from stdin
 * Improve maximum travel speed
 * Editable default speeds for G0 and G1 commands
 * Fix X axis endstop to provide zeroing

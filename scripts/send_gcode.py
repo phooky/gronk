@@ -56,6 +56,7 @@ def send_to_gronk(line):
         else:
             raise Exception("Bad response "+rsp.decode('utf-8')+" (to "+line+")")
 
+send_to_gronk('M17') # In case the user forgets
 for filename in args.filename:
     f = open(filename)
     for line in f.readlines():
