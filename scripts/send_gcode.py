@@ -3,16 +3,27 @@
 import serial
 import argparse
 import time
+import sys
 
 parser = argparse.ArgumentParser(
     prog = 'send_gcode.py',
     description = 'Send a GCode file to Gronk.')
 parser.add_argument('-P', '--port', default='/dev/ttyACM0')
 parser.add_argument('-v', '--verbose', action='store_true')
-parser.add_argument('filename',metavar='FILE',nargs='+')
+parser.add_argument('filename',metavar='FILE',nargs='+',help="A list of files to send to Gronk, or '-' to send input from stdin.")
 
 args = parser.parse_args()
+
+# validate args
+if '-' in args.filename:
+    if len(args.filename) > 1:
+        print("Cannot mix stdin with other file paths.")
+        sys.exit(1)
+
+
 s = serial.Serial(args.port,115200,timeout = 0.25)
+
+
 # clear out data
 print("connecting.")
 while len(s.read(100)) > 90:
@@ -58,7 +69,7 @@ def send_to_gronk(line):
 
 send_to_gronk('M17') # In case the user forgets
 for filename in args.filename:
-    f = open(filename)
+    f = open(filename) if filename != '-' else sys.stdin # need to test
     for line in f.readlines():
         send_to_gronk(line)
 
