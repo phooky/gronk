@@ -32,8 +32,8 @@
 */
 
 // NEEDS RECALIB ON GRONK
-const float STEPS_PER_MM_X = 156;
-const float STEPS_PER_MM_Y = 156;
+const float STEPS_PER_MM_X = 158;
+const float STEPS_PER_MM_Y = 158;
 
 const float STEPPER_FREQ =  10000; // stepper interrupts per second
 
