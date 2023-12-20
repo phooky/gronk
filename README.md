@@ -147,7 +147,6 @@ Table of supported M codes
 ## TODO
 
 There's still a little work to do on GRONK.
-* support sending input from stdin
 * Improve maximum travel speed
 * Editable default speeds for G0 and G1 commands
 * Fix X axis endstop to provide zeroing
