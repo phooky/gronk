@@ -104,9 +104,12 @@ ResultCode handle_gcode() {
     switch (v) {
     case 1:   // Linear move
     case 0:   // Rapid move
-        if (!motion::queue_ready()) return RC_FULL;
-        motion::enqueue_move(cmd()[X], cmd()[Y], cmd()[F]);
-        return RC_OK;
+        {
+            if (!motion::queue_ready()) return RC_FULL;
+            float feedrate = cmd().has_param(F)?cmd()[F]:(v==0?DEFAULT_G0_FEEDRATE:DEFAULT_G1_FEEDRATE);
+            motion::enqueue_move(cmd()[X], cmd()[Y], feedrate);
+            return RC_OK;
+        }
     case 4:   // Dwell
         if (!motion::queue_ready()) return RC_FULL;
         motion::enqueue_dwell(cmd()[P]);
