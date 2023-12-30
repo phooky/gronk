@@ -71,6 +71,7 @@ ResultCode handle_mcode() {
     switch (v) {
     case 3: // Plotter pen down
     case 4: // Plotter pen up
+        if (!motion::queue_ready()) return RC_FULL;
         motion::enqueue_pen(v == 4); // M4 is up
         return RC_OK;
     case 230:  // Enable character echo
