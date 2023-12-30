@@ -144,6 +144,20 @@ Table of supported M codes
 
 [^3] Not yet implemented.
 
+## Mounting pens
+
+The mounting block which holds pens will securely hold a
+straight-sided 12mm diameter cylinder. If you're planning on using any
+kind of pen or other implement that doesn't meet that spec, you're
+going to have to contruct a pen holder. A few examples are included in
+the `mechanical` folder.
+
+The pen tip should be about 30 mm below the top of the mounting
+block. The block is spring-loaded, but the tip will most likely impact
+the paper pretty rapidly, so if the pen tip is delicate (say, a
+mechanical drafting pen) I'd recommend building some sort of
+protection into your pen holder.
+
 ## TODO
 
 There's still a little work to do on GRONK.
