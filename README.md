@@ -119,8 +119,8 @@ everything else.
 
 | G-code | Meaning                      | Example         | Explanation                               |
 |--------|------------------------------|-----------------|-------------------------------------------|
-| G00    | Ordinary movement            | G00 X10 Y20 F30 | Move to (10,20) at a speed of 30mm/s [^1] |
-| G01    | Fast travel                  | G01 X10 Y20 F30 | Same as above [^1]                        |
+| G00    | Fast travel                  | G00 X10 Y20 F30 | Move to (10,20) at a speed of 30mm/s [^1] |
+| G01    | Ordinary movement            | G01 X10 Y20 F30 | Same as above [^1]                        |
 | G04    | Dwell                        | G04 P20         | Pause for 20ms [^2]                       |
 | G92    | Set current position as zero | G92             | Set current location as (0,0)             |
 

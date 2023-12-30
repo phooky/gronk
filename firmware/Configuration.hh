@@ -24,16 +24,14 @@
 // denoted by X, Y, Z, A and B.
 #define STEPPER_COUNT 5
 #define MAX_STEPPERS 5
-#define EXTRUDERS 2
 
-/*
-#define XY_STEPS_PER_MM 88.888889
-#define Z_STEPS_PER_MM 400
-*/
+// ** CALIBRATION CONSTANTS
 
-// NEEDS RECALIB ON GRONK
 const float STEPS_PER_MM_X = 158;
 const float STEPS_PER_MM_Y = 158;
+
+const float DEFAULT_G0_FEEDRATE = 50;
+const float DEFAULT_G1_FEEDRATE = 30;
 
 const float STEPPER_FREQ =  10000; // stepper interrupts per second
 
@@ -318,22 +316,5 @@ const int32_t DOWN_CYCLES = 100;
 // 3,4,5,6,7,8 - The higher the number, the earlier the start of the slowdown
 #define ACCELERATION_SLOWDOWN_LIMIT 4
 
-// ACCELERATION_EXTRUDER_WHEN_NEGATIVE specifies the direction of extruder.
-// If negative steps cause an extruder to extrude material, then set this to
-// true. If positive steps cause an extruder to extrude material, then set this
-// to false. Note: Although a Replicator can have 2 extruders rotating in
-// opposite directions, both extruders require negative steps to extrude
-// material. This setting effects "Advance" and "Extruder Deprime".
-#define ACCELERATION_EXTRUDE_WHEN_NEGATIVE_A true
-#define ACCELERATION_EXTRUDE_WHEN_NEGATIVE_B true
-
-// If defined, overlapping stepper interrupts don't cause clunking
-// The ideal solution it to adjust calc_timer, but this is just a safeguard
-#define ANTI_CLUNK_PROTECTION
-
-// If defined, speed is drastically reducing to crawling
-// Very useful for watching acceleration and locating any bugs visually
-// Only slows down when acceleration is also set on.
-// #define DEBUG_SLOW_MOTION
 
 #endif // BOARDS_MBV40_CONFIGURATION_HH_
