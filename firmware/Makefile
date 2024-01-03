@@ -11,7 +11,7 @@ TARGET_ELF=$(TARGET).elf
 TARGET_HEX=$(TARGET).hex
 TARGET_MAP=$(TARGET).map
 
-OBJS=Main.o Pin.o SoftI2cManager.o TWI.o \
+OBJS=Main.o Pin.o SoftI2cManager.o \
 	LiquidCrystalSerial.o ButtonArray.o Motion.o \
 	UART.o CommandParser.o
 
