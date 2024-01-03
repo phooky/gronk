@@ -32,7 +32,6 @@
 #define B_STEPPER_MIN NullPin
 #define B_STEPPER_MAX NullPin
 
-extern int intdbg;
 /// assume max vref is 1.95V  (allowable vref for max current rating of stepper
 /// is 1.814)
 #define DIGI_POT_MAX 118
@@ -103,9 +102,7 @@ typedef struct {
     const Pin pot;
 } StepPins;
 
-const StepPins stepPins[STEPPER_COUNT] = {AXIS_PIN_SET(X), AXIS_PIN_SET(Y),
-                                          AXIS_PIN_SET(Z), AXIS_PIN_SET(A),
-                                          AXIS_PIN_SET(B)};
+const StepPins stepPins[STEPPER_COUNT] = {AXIS_PIN_SET(X), AXIS_PIN_SET(Y) };
 
 void setPotValue(const Pin &pin, uint8_t val) {
     SoftI2cManager i2cPots = SoftI2cManager::getI2cManager();
@@ -223,6 +220,10 @@ bool enqueue_pen(bool up) {
     cmd.pen = up;
     motion_q.queue(cmd);
     return true;
+}
+
+bool queue_done() {
+    return motion_q.empty();
 }
 
 //// COMMAND QUEUE END

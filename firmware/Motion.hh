@@ -26,7 +26,7 @@
 
 namespace motion {
 
-enum { X, Y, Z, A, B };
+enum { X, Y };
 void reset_axes();
 void init();
 void enable(uint8_t which, bool enable = true);
@@ -38,6 +38,7 @@ bool queue_ready();
 bool enqueue_move(float x, float y, float feed);
 bool enqueue_dwell(float milliseconds);
 bool enqueue_pen(bool up);
+bool queue_done();
 
 void do_interrupt();
 }; // namespace motion

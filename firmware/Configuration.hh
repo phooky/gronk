@@ -22,8 +22,8 @@
 // --- Axis configuration ---
 // Define the number of stepper axes supported by the board.  The axes are
 // denoted by X, Y, Z, A and B.
-#define STEPPER_COUNT 5
-#define MAX_STEPPERS 5
+#define STEPPER_COUNT 2
+#define MAX_STEPPERS 2
 
 // ** CALIBRATION CONSTANTS
 
