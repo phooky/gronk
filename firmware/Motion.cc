@@ -60,7 +60,6 @@ public:
         struct {
             Steps target[2];
             int32_t velocity[2];
-            int32_t acceleration[2];
         } move;
         bool pen;
     };
@@ -80,14 +79,12 @@ public:
     int32_t partial; // partial steps moved
     Steps target; // in steps
     int32_t velocity;
-    int32_t acceleration; // ignore for the moment
     StepAxisInfo() { reset(); }
     void reset() {
         position = 0;
         partial = 0;
         target = 0;
         velocity = 0;
-        acceleration = 0;
     }
 };
 
@@ -193,7 +190,6 @@ bool enqueue_move(float x, float y, float feedrate) {
         /// Constraint: the time is larger than the number of steps.
         /// partials are 24 bits in a 32-bit variable.
         cmd.move.velocity[i] = ((delta[i] * (1L<<24)) / (int64_t)cmd.time);
-        cmd.move.acceleration[i] = 0;
         last_pos[i] = pt[i];
 
         //char buf[60];
