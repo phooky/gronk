@@ -70,6 +70,28 @@ public:
 CBuf<32,MotionCmd> motion_q;
 MotionCmd cur_cmd; // command currently being executed
 
+/***************
+
+Refactor notes:
+- Should be able to handle at least 1280mm of travel in either direction.
+- 158 microsteps/mm.
+- 202240 steps over entire range. (<18 bits)
+- 15625 interrupts/sec. (64 microseconds per interrupt) (1024 instr. cycles / interrupt)
+-- This gives us a maximum feedrate of under 50mm/s.
+-- End-to-end travel in 30s. That's not fast, but we'll take it.
+-- Practical limit closer to 40mm/s, so that's our cap on feedrate.
+
+- Stepper driver timings:
+-- setup (before step goes high) and hold (after step goes high) are both 200ns
+-- step pulse width is 1 microsecond, followed by 1 microsecond low. That's 16 instruction cycles.
+-- instruction cycles are 62.5 nanoseconds, so four cycles setup is fine.
+
+- Worst case instruction: 1 Y, 202240 X.
+
+- We'll use 64 bits for the position and 32 for the velocity.
+ ***************/
+
+
 
 int64_t last_pos[2] = { 0,0 };
 
