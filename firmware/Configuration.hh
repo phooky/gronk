@@ -33,8 +33,8 @@ const float STEPS_PER_MM_Y = 158;
 const float DEFAULT_G0_FEEDRATE = 50;
 const float DEFAULT_G1_FEEDRATE = 30;
 
-//const float STEPPER_FREQ =  10000; // stepper interrupts per second
-const float STEPPER_FREQ =  15625;
+const float STEPPER_FREQ =  10000; // stepper interrupts per second
+//const float STEPPER_FREQ =  15625;
 //const float STEPPER_FREQ =  20000;
 
 // Computing the maximum feedrate on an axis:
