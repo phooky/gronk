@@ -65,7 +65,7 @@ public:
         } move;
         bool pen;
     };
-    uint32_t time;
+    uint64_t time;
     MotionCmd() : type (CmdType::NONE) {}
 };
 

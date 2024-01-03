@@ -30,11 +30,19 @@
 const float STEPS_PER_MM_X = 158;
 const float STEPS_PER_MM_Y = 158;
 
-const float DEFAULT_G0_FEEDRATE = 30;
+const float DEFAULT_G0_FEEDRATE = 50;
 const float DEFAULT_G1_FEEDRATE = 30;
 
-const float STEPPER_FREQ =  10000; // stepper interrupts per second
+//const float STEPPER_FREQ =  10000; // stepper interrupts per second
+const float STEPPER_FREQ =  15625;
+//const float STEPPER_FREQ =  20000;
 
+// Computing the maximum feedrate on an axis:
+// Feedrates are in mm/s.
+// The maximum step rate is 1/2 the stepper frequency.
+const float MAX_X_FEEDRATE = (STEPPER_FREQ/2)/STEPS_PER_MM_X;
+const float MAX_Y_FEEDRATE = (STEPPER_FREQ/2)/STEPS_PER_MM_Y;
+ 
 // Time to lift or lower a pen in cycles
 const int32_t UP_CYCLES = 60;
 const int32_t DOWN_CYCLES = 100;
