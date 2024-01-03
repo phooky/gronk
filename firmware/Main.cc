@@ -20,7 +20,6 @@
 #include "Configuration.hh"
 #include "LiquidCrystalSerial.hh"
 #include "Pin.hh"
-#include "RGB_LED.hh"
 #include "SoftI2cManager.hh"
 #include "Motion.hh"
 #include "UART.hh"
@@ -140,8 +139,6 @@ int main() {
     motion::setPotValue(Y_POT_PIN, 80);
     init_timers();
     sei();
-    RGB_LED::init();
-    RGB_LED::setCustomColor(0x10, 0x88, 0x10);
 
     ButtonArray::init();
 
