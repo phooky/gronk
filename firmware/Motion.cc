@@ -58,7 +58,6 @@ public:
     CmdType type;
     union {
         struct {
-            Steps target[2];
             int32_t velocity[2];
         } move;
         bool pen;
@@ -99,13 +98,11 @@ class StepAxisInfo {
 public:
     Steps position; // in steps
     int32_t partial; // partial steps moved
-    Steps target; // in steps
     int32_t velocity;
     StepAxisInfo() { reset(); }
     void reset() {
         position = 0;
         partial = 0;
-        target = 0;
         velocity = 0;
     }
 };
@@ -208,7 +205,6 @@ bool enqueue_move(float x, float y, float feedrate) {
     double cycles = (distance / feedrate) * STEPPER_FREQ; // stepper interrupt count
     cmd.time = cycles;
     for (auto i = 0; i < 2; i++) {
-        cmd.move.target[i] = pt[i];
         /// Constraint: the time is larger than the number of steps.
         /// partials are 24 bits in a 32-bit variable.
         cmd.move.velocity[i] = ((delta[i] * (1L<<24)) / (int64_t)cmd.time);
@@ -275,8 +271,8 @@ void next_cmd() {
    }
 }
 
+// Does not need sei/cli since it's called from an ISR
 void do_interrupt() {
-    cli();
     if (cur_cmd.time == 0 || cur_cmd.type == MotionCmd::CmdType::NONE) {
         next_cmd();
     } else {
@@ -295,6 +291,5 @@ void do_interrupt() {
         }
         cur_cmd.time--;
     }
-    sei();
 }
 }; // namespace motion

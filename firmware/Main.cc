@@ -169,7 +169,6 @@ int main() {
             }
             cmd().reset();
         }
-        _delay_ms(50);
         /*
           example of button scan call, we're not using the UI right now
         ButtonArray::scan();
@@ -178,8 +177,6 @@ int main() {
     }
     return 0;
 }
-
-ISR(TIMER2_COMPA_vect) {}
 
 ISR(TIMER5_COMPA_vect) {
     // Handle stepper interrupt.

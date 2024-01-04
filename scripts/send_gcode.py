@@ -61,7 +61,7 @@ def send_to_gronk(line):
             if not delay and args.verbose:
                 print("full, trying resend...")
                 delay = True
-            time.sleep(0.05)
+            #time.sleep(0.05)
         elif rsp[:3] == b'err':
             raise GCodeError(line + "(" + rsp.decode('utf-8')+")")
         else:
