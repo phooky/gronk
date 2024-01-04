@@ -1,0 +1,13 @@
+[gwrite]
+default_profile = "gronk"
+
+[gwrite.gronk]
+unit="mm"
+document_start="M17\nM04\n"
+layer_start=""
+layer_end=""
+layer_join=""
+line_start=""
+line_end="M04\n"
+segment_first="G0 X{x:.3f} Y{y:.3f} 30\nM03\n"
+segment="G1 X{x:.3f} Y{y:.3f} 30\n"
