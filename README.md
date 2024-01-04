@@ -7,7 +7,10 @@ Internally, GRONK uses the electronics from an old school MakerBot
 Replicator 2 (a MightBoard rev. H). The firmware here uses a couple of
 bits of the original code but is mostly new.
 
-GRONK accepts G codes over USB.
+GRONK accepts gcode over USB. You can use `vpype-gcode` to convert SVG
+files to appropriate gcode; see the section on [plotting
+SVGs](#plot-svg).
+
 
 GRONK is named after the horrible noise it made when outfitted with
 full-step stepper drivers.
@@ -20,12 +23,9 @@ full-step stepper drivers.
 2. Connect the USB cable on the left side to your computer; GRONK will
    appear as a USB serial port. Connect to it at 115200 baud.
 3. Load paper and pen.
-3. Send G-Code commands to GRONK using the `send_gcode.py` script in
-   the `scripts` directory. You'll need to provide the name of the
-   file you want to print and, depending on the platform, the name of
-   the port that GRONK appeared as. For example, you can run the
-   `star.gcode` script on Linux with the command line
-   `./send_gcode.py -P /dev/ttyACM0 star.gcode`.
+4. Use the `send_gcode.py` script to send gcode to the plotter. You
+   can either [send your own custom gcode](#sending-gcode), or
+   [convert an SVG file](#plot-svg).
    
 Details below.
 
@@ -158,12 +158,58 @@ the paper pretty rapidly, so if the pen tip is delicate (say, a
 mechanical drafting pen) I'd recommend building some sort of
 protection into your pen holder.
 
+
+## Sending gcode to the printer {#sending-gcode}
+
+You can send G-Code commands to GRONK using the `send_gcode.py` script
+in the `scripts` directory. You'll need to provide the name of the
+file you want to print and, depending on the platform, the name of the
+port that GRONK appeared as. For example, you can run the `star.gcode` 
+script on Linux with the command line `./send_gcode.py -P /dev/ttyACM0
+star.gcode`.
+
+### Usage
+```
+usage: send_gcode.py [-h] [-P PORT] [-v] FILE [FILE ...]
+
+Send a GCode file to Gronk.
+
+positional arguments:
+  FILE                  A list of files to send to Gronk, or '-' to send input from stdin.
+
+options:
+  -h, --help            show this help message and exit
+  -P PORT, --port PORT
+  -v, --verbose
+```
+
+## Plotting SVGs {#plot-svg}
+
+You can convert SVGs to the proper gcode format using the `vpype` and
+`vpype-gcode` tools. If you've got python installed, you can install
+these easily with pip:
+```
+pip install vpype vpype-gcode
+```
+
+There is a `vpype-gcode.toml` file in the scripts directory. You can
+then use vpype to generate the correct gcode like so:
+
+```
+vpype -c vpype-gcode.toml read --quantization 0.5mm YOUR_SVG.svg gwrite YOUR_GCODE.gcode
+```
+
+Or you can just pipe the output directly to `send_gcode` without
+writing out the intermediate file:
+
+```
+vpype -c vpype-gcode.toml read --quantization 0.5mm YOUR_SVG.svg gwrite - | ./send_gcode.py -
+```
+
 ## TODO
 
 There's still a little work to do on GRONK.
-* Improve maximum travel speed
 * Editable default speeds for G0 and G1 commands
 * Fix X axis endstop to provide zeroing
 * Implement the machine reset command
 * Tack on a Pico W or Pi to provide wireless streaming or store programs
-* Print out new levers to replace the broken ones
