@@ -132,6 +132,9 @@ ResultCode handle_gcode() {
             motion::set_jog(cmd()[X], cmd()[Y], feedrate);
             return RC_OK;
         }
+    case 101:
+        motion::set_jog(0,0,0);
+        return RC_OK;
     default:
         return RC_ERR;
     }
