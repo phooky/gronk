@@ -87,6 +87,7 @@ Refactor notes:
 
 - Worst case instruction: 1 Y, 202240 X.
 
+--- THE BELOW IS NOT IMPLEMENTED, sorry
 - We'll use 64 bits for the position and 32 for the velocity.
  ***************/
 
@@ -96,12 +97,10 @@ int64_t last_pos[2] = { 0,0 };
 
 class StepAxisInfo {
 public:
-    Steps position; // in steps
     int32_t partial; // partial steps moved
     int32_t velocity;
     StepAxisInfo() { reset(); }
     void reset() {
-        position = 0;
         partial = 0;
         velocity = 0;
     }
@@ -219,7 +218,7 @@ bool enqueue_move(float x, float y, float feedrate) {
 }
 
 double get_axis_position(uint8_t which) {
-    return 0;
+    return (double)last_pos[which] / (double)STEPS_PER_MM[which];
 }
 
 bool enqueue_dwell(float milliseconds) {

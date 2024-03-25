@@ -138,6 +138,7 @@ Table of supported M codes
 | M04         | Plotter pen up                                   |
 | M17 [X] [Y] | Enable steppers. If none specified, enable all.  |
 | M18 [X] [Y] | Disable steppers. If none specified, enable all. |
+| M114        | Report current X and Y position.                 |
 | M230        | Turn on command echoing.                         |
 | M231        | Turn off command echoing.                        |
 | M255        | Reset machine. [^3]                              |
