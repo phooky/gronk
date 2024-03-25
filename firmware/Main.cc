@@ -126,6 +126,12 @@ ResultCode handle_gcode() {
     case 92:
         motion::reset_axes();
         return RC_OK;
+    case 100:
+        {
+            float feedrate = cmd().has_param(F)?cmd()[F]:(v==0?DEFAULT_G0_FEEDRATE:DEFAULT_G1_FEEDRATE);
+            motion::set_jog(cmd()[X], cmd()[Y], feedrate);
+            return RC_OK;
+        }
     default:
         return RC_ERR;
     }

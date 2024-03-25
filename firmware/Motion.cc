@@ -246,6 +246,29 @@ bool queue_done() {
 //// COMMAND QUEUE END
 
 
+void set_jog(float x, float y, float feed) {
+    MotionCmd cmd;
+    if (x != 0 || y != 0) {
+        cmd.type = MotionCmd::CmdType::MOVE;
+        cmd.time = STEPPER_FREQ * 10; // maximum 10s, for safety?
+        double inter = (double)feed * (double)(1L<<24) / (double)STEPPER_FREQ;
+        if (x > 0) cmd.move.velocity[0] = (int32_t)(inter * STEPS_PER_MM[0]);
+        else if (x < 0) cmd.move.velocity[0] = -(int32_t)(inter * STEPS_PER_MM[0]);
+        else cmd.move.velocity[0] = 0;
+        if (y > 0) cmd.move.velocity[1] = (int32_t)(inter * STEPS_PER_MM[1]);
+        else if (y < 0) cmd.move.velocity[1] = -(int32_t)(inter * STEPS_PER_MM[1]);
+        else cmd.move.velocity[1] = 0;
+    }
+    axis[0].velocity = cmd.move.velocity[0];
+    axis[1].velocity = cmd.move.velocity[1];
+    cli(); // stop interrupts for now.
+    // Empty the command queue.
+    motion_q.reset();
+    cur_cmd = cmd;
+    sei(); // continue
+}
+
+
 void next_cmd() {
     // set pen back to idle power if previous motion was pen up/pen down
     if (cur_cmd.type == MotionCmd::CmdType::PEN) {

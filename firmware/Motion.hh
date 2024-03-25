@@ -43,6 +43,10 @@ bool enqueue_dwell(float milliseconds);
 bool enqueue_pen(bool up);
 bool queue_done();
 
+/// Set current "jogging" state. Jogs are just moves that refresh themselves.
+/// Jogging immediately empties the queue!!!
+void set_jog(float x, float y, float feed);
+
 void do_interrupt();
 }; // namespace motion
 

@@ -123,6 +123,9 @@ everything else.
 | G01    | Ordinary movement            | G01 X10 Y20 F30 | Same as above [^1]                        |
 | G04    | Dwell                        | G04 P20         | Pause for 20ms [^2]                       |
 | G92    | Set current position as zero | G92             | Set current location as (0,0)             |
+| G100   | Jogging                      | G100 X0 Y-1     | Jog in negative Y direction               |
+| G101   | Stop jogging                 | G101            | Halt, equiv to G100 X0 Y0                 |
+
 
 
 [^1] At present, the feedrate parameter is always required. In the
