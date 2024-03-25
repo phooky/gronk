@@ -218,6 +218,10 @@ bool enqueue_move(float x, float y, float feedrate) {
     return true;
 }
 
+double get_axis_position(uint8_t which) {
+    return 0;
+}
+
 bool enqueue_dwell(float milliseconds) {
     MotionCmd cmd;
     cmd.type = MotionCmd::CmdType::DWELL;

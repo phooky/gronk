@@ -31,6 +31,9 @@ void reset_axes();
 void init();
 void enable(uint8_t which, bool enable = true);
 void setPotValue(const Pin &pin, uint8_t val);
+/// Return the current position of the given axis. This will be unreliable if the
+/// axis is still in motion!
+double get_axis_position(uint8_t which);
 
 /// Check if there's space on the movement queue for another move
 /// or dwell

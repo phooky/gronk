@@ -22,7 +22,7 @@ $(TARGET_HEX): $(TARGET_ELF)
 	avr-objcopy -O ihex -R .eeprom $< $@
 
 $(TARGET_ELF): $(OBJS)
-	/usr/bin/avr-gcc -mmcu=$(CPU) -Os -Wl,-Map,$(TARGET).map -Wl,--gc-sections -o $@ $^ -lm
+	/usr/bin/avr-gcc -mmcu=$(CPU) -Os -Wl,-u,vfprintf,-Map,$(TARGET).map -Wl,--gc-sections -o $@ $^ -lm -lprintf_flt
 
 # if you need floats in printf
 #	/usr/bin/avr-gcc -mmcu=$(CPU) -Os -Wl,-u,vfprintf,-Map,$(TARGET).map -Wl,--gc-sections -o $@ $^ -lm -lprintf_flt

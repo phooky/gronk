@@ -27,6 +27,7 @@
 #include <avr/wdt.h>
 #include <util/atomic.h>
 #include <util/delay.h>
+#include <stdio.h>
 
 void reset(bool hard_reset) {
     ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -93,7 +94,15 @@ ResultCode handle_mcode() {
                 for (int i = 0; i < 3; i++) motion::enable(i, en);
         }
         return RC_OK;
-
+    case 114: // Report current position
+        {
+            char buf[40];
+            sprintf(buf,"X: %.2f Y: %.2f",
+                    motion::get_axis_position(motion::X),
+                    motion::get_axis_position(motion::Y));
+            UART::write_string(buf);
+        }
+        return RC_OK;
     default:
         return RC_ERR;
     }
