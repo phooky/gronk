@@ -240,7 +240,7 @@ bool enqueue_pen(bool up) {
 }
 
 bool queue_done() {
-    return motion_q.empty();
+    return motion_q.empty() && cur_cmd.type == MotionCmd::CmdType::NONE;
 }
 
 //// COMMAND QUEUE END

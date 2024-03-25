@@ -142,11 +142,14 @@ Table of supported M codes
 | M17 [X] [Y] | Enable steppers. If none specified, enable all.  |
 | M18 [X] [Y] | Disable steppers. If none specified, enable all. |
 | M114        | Report current X and Y position.                 |
+| M115        | Check that motion queue is empty. [^4]           |
 | M230        | Turn on command echoing.                         |
 | M231        | Turn off command echoing.                        |
 | M255        | Reset machine. [^3]                              |
 
 [^3] Not yet implemented.
+[^4] Returns "ok" if queue is empty; "full" if queue is not (even if the queue is not completely full).
+
 
 ## Mounting pens
 

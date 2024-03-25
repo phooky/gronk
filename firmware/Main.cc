@@ -103,6 +103,9 @@ ResultCode handle_mcode() {
             UART::write_string(buf);
         }
         return RC_OK;
+    case 115: // Report if queue is empty
+        if (motion::queue_done()) return RC_OK;
+        return RC_FULL;
     default:
         return RC_ERR;
     }
