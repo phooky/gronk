@@ -54,7 +54,7 @@ class Gronk:
     def send_file(self,path):
         self.enable_steppers()
         f = open(path) if filename != '-' else sys.stdin # need to test
-        for line in f.readlines():
+        for line in f.readlines():            
             self.send(line)
         self.s.flush()
 
