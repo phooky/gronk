@@ -1,6 +1,9 @@
+import RPi.GPIO as GPIO
+import time
+from queue import Queue
+from threading import Thread, Event
 
-
-class GronkButtons:
+class Buttons:
     rows = [ 12, 22, 18 ]
     columns = [5, 6, 13]
     keymap = [ "S+", "OK", "-", "P-", "S-", "P+", "TEST", "SET", "ONLINE" ]
@@ -16,6 +19,7 @@ class GronkButtons:
         self.running.clear()
 
     def scan_row(self,row_pin):
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(row_pin,GPIO.OUT,initial=GPIO.HIGH)
         v = 0
         time.sleep(0.01)
