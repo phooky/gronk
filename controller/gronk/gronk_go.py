@@ -23,7 +23,7 @@ epd = EPD()
 # resolution is 250x122
 
 font_logo = ImageFont.truetype('./fonts/ArchivoBlack-Regular.ttf',26)
-font_txt = ImageFont.truetype('./fonts/static/ArchivoNarrow-Regular.ttf',16)
+font_txt = ImageFont.truetype('./fonts/static/ArchivoNarrow-Bold.ttf',16)
 
 # Todo -- status should return pen state!
 pendown = None # pen starts in indeterminate state; assume down
@@ -33,11 +33,12 @@ def show_ready(path = None):
     epd.Clear(0xff)
     image = Image.new('1', (epd.height,epd.width),255)
     draw = ImageDraw.Draw(image)
-    draw.text((10,5),'gronk.', font=font_logo, fill=0)
-    draw.text((0,40),'Arrow keys to jog', font=font_txt, fill=0)
-    draw.text((0,60),'TEST toggles pen up/down', font=font_txt, fill=0)
-    draw.text((0,80),'Hold "ONLINE" for 5 seconds to shut down.', font=font_txt, fill=0)
-    draw.text((0,100),'Upload files at http://gronk.lan/', font=font_txt, fill=0)
+    draw.text((0,0),'gronk is ready.', font=font_logo, fill=0)
+    draw.text((0,25),'Arrow keys to jog', font=font_txt, fill=0)
+    draw.text((0,45),'TEST toggles pen up/down', font=font_txt, fill=0)
+    draw.text((0,65),'Upload files at http://gronk.lan/', font=font_txt, fill=0)
+    draw.text((15,85),'Hold "ONLINE" button', font=font_txt, fill=0)
+    draw.text((15,105),'for 5 seconds to shut down.', font=font_txt, fill=0)
     epd.display(epd.getbuffer(image))
     epd.sleep()
 

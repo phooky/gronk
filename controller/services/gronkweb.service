@@ -8,8 +8,8 @@ Type=simple
 Restart=always
 RestartSec=1
 User=nycr
-WorkingDirectory=/home/nycr
-ExecStart=/usr/bin/uwsgi_python3 --socket :9090 --wsgi-file /home/nycr/scripts/gronk_web.py
+WorkingDirectory=/home/nycr/gronk
+ExecStart=/usr/bin/uwsgi_python3 --socket :9090 --wsgi-file /home/nycr/gronk/gronk_web.py
 
 [Install]
 WantedBy=multi-user.target
