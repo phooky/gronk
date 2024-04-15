@@ -47,8 +47,11 @@ def show_goodbye():
     image = Image.new('1', (epd.height,epd.width),255)
     draw = ImageDraw.Draw(image)
     draw.text((10,5),'goodbye, gronk.', font=font_logo, fill=0)
-    draw.text((5,40),'Please wait thirty seconds before', font=font_txt, fill=0)
-    draw.text((5,60),'switching off.', font=font_txt, fill=0)
+    draw.text((0,40),'Please wait thirty seconds before', font=font_txt, fill=0)
+    draw.text((0,60),'switching off.', font=font_txt, fill=0)
+    draw.text((0,80),'Expect to wait about 120 seconds for', font=font_txt, fill=0)
+    draw.text((0,100),'gronk to boot after turning back on.', font=font_txt, fill=0)
+
     epd.display(epd.getbuffer(image))
     epd.sleep()
 

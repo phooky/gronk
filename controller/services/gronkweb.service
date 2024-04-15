@@ -1,0 +1,15 @@
+[Unit]
+Description=GRONK web service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=nycr
+WorkingDirectory=/home/nycr
+ExecStart=/usr/bin/uwsgi_python3 --socket :9090 --wsgi-file /home/nycr/scripts/gronk_web.py
+
+[Install]
+WantedBy=multi-user.target

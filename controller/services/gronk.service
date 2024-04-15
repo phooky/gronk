@@ -1,0 +1,15 @@
+[Unit]
+Description=GRONK script service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=nycr
+WorkingDirectory=/home/nycr/gronk
+ExecStart=/usr/bin/env python /home/nycr/gronk/gronk_go.py
+
+[Install]
+WantedBy=multi-user.target
