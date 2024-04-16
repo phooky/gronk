@@ -43,6 +43,9 @@ error_templ = """
 """
 
 
+upload_dir = os.environ.get('GRONK_UPLOAD_DIR','/var/www/gronk/uploads')
+
+
 def application(environ, start_response):
     method = environ["REQUEST_METHOD"]
     files = {}
@@ -52,15 +55,8 @@ def application(environ, start_response):
         name = file.file_name
         (_, name) = os.path.split(name)
         (_, ext) = os.path.splitext(name)
-        fi = file.file_object
-        f=open(os.path.join('/var/www/gronk/uploads',name.decode()),"wb")
-        while True:
-            d = fi.read(2048)
-            if not d:
-                break
-            f.write(d)
-            f.close()
-        files[file.field_name] = {'name': file.file_name, 'object': file.file_object}    
+        file.flush_to_disk()
+        files[file.field_name] = {'name': file.file_name, 'location': file.actual_file_name}    
     if method == 'POST':
         start_response("200 OK", [("Content-Type", "text/html")])
         multipart_headers = {'Content-Type': environ['CONTENT_TYPE']}
@@ -71,26 +67,17 @@ def application(environ, start_response):
             (_, ext) = os.path.splitext(name.decode())
             ext = ext.lower()
             if ext == '.gcode':
-                f=open(os.path.join('/var/www/gronk/uploads',name.decode()),"wb")
-                fi = files[b'file']['object']
-                while True:
-                    d = fi.read(2048)
-                    stuff = stuff + " read {}".format(len(d))
-                    if not d:
-                        break
-                    f.write(d)
-                fi.close()
-                f.close()
+                pass
             elif ext == '.svg':
                 pass
             else:
                 raise RuntimeError("Unable to process files of type '"+ext+"'. Please make sure your file has a .gcode or .svg extension.")
+            return uploads_templ.format(
+                'stuff',
+                environ["CONTENT_TYPE"],
+                environ["CONTENT_LENGTH"]).encode('utf-8')
         except Exception as e:
             return error_templ.format(files,str(e)).encode('utf-8')
-        return uploads_templ.format(
-            stuff,
-            environ["CONTENT_TYPE"],
-            environ["CONTENT_LENGTH"]).encode('utf-8')
     else:
         start_response("200 OK", [("Content-Type", "text/html")])
         return template.format(environ["REQUEST_METHOD"]).encode('utf-8')

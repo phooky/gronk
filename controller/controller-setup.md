@@ -15,7 +15,7 @@
   "RASPBERRY PI OS LITE (32-BIT)"
 * Install python3-pil
 * Install nginx
-* Install fcgiwrap
+* Install uwsgi uwsgi-plugin-python3
 * Install picocom
 * Install python3-serial
 * Install python3-multipart
