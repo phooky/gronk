@@ -1,35 +1,19 @@
 import multipart
 import os.path
+import tempfile
+import multiprocessing
+from jinja2 import Template
+from multiprocessing.connection import Client
 
-template = """
-<html>
-<head>
-    <title>GRONK ONLINE, the giant plotter online service</title>
-</head>
-<body>
-    <h1>This is GRONK, NYCR's largest-format plotter.</h1>
-You can send SVG or raw GCode files to GRONK. GRONK uses its own special GCode
-    <form method="post" enctype="multipart/form-data">
-        <label for="file">File to plot:</label>
-        <input id="file" name="file" type="file" />
-        <button>Send SVG or GCODE file</button>
-    </form>
-    Request method was "{}".
-</body>
-</html>
-"""
+address = ("localhost", 6543)
 
-uploads_templ = """
-<html>
-<head><title>GRONK ONLINE</title></head>
-<body>
-<h1>GRONK has received your file.</h1>
-<p>Details:
-<p>Filename {}, Content type {}, content length {}.
-</body>
-</html>
-"""
-
+def get_status():
+    with Client(address, authkey = b"gronk") as connection:
+        connection.send("stat_req")
+        response = connection.recv()
+        print(response)    
+        return response
+    return None
 
 error_templ = """
 <html>
@@ -43,28 +27,28 @@ error_templ = """
 """
 
 
-upload_dir = os.environ.get('GRONK_UPLOAD_DIR','/var/www/gronk/uploads')
-
+base_templ = Template(open('templates/base.html.jinja').read())
 
 def application(environ, start_response):
+    curfile = None
     method = environ["REQUEST_METHOD"]
-    files = {}
+    get_status()
     def on_field(field):
         pass
     def on_file(file):
+        nonlocal curfile
         name = file.file_name
-        (_, name) = os.path.split(name)
-        (_, ext) = os.path.splitext(name)
+        (_, name) = os.path.split(file.file_name.decode())
         file.flush_to_disk()
-        files[file.field_name] = {'name': file.file_name, 'location': file.actual_file_name}    
+        curfile = (name,file.actual_file_name)
     if method == 'POST':
         start_response("200 OK", [("Content-Type", "text/html")])
         multipart_headers = {'Content-Type': environ['CONTENT_TYPE']}
         multipart_headers['Content-Length'] = environ['CONTENT_LENGTH']
         try:
             multipart.parse_form(multipart_headers, environ['wsgi.input'], on_field, on_file)
-            (_, name) = os.path.split(files[b'file']['name'])
-            (_, ext) = os.path.splitext(name.decode())
+            name = curfile[0]
+            (_, ext) = os.path.splitext(name)
             ext = ext.lower()
             if ext == '.gcode':
                 pass
@@ -72,13 +56,12 @@ def application(environ, start_response):
                 pass
             else:
                 raise RuntimeError("Unable to process files of type '"+ext+"'. Please make sure your file has a .gcode or .svg extension.")
-            return uploads_templ.format(
-                'stuff',
-                environ["CONTENT_TYPE"],
-                environ["CONTENT_LENGTH"]).encode('utf-8')
+            return base_templ.render(curfile=curfile).encode('utf-8')
         except Exception as e:
             return error_templ.format(files,str(e)).encode('utf-8')
     else:
         start_response("200 OK", [("Content-Type", "text/html")])
-        return template.format(environ["REQUEST_METHOD"]).encode('utf-8')
+        return base_templ.render(curfile=curfile).encode('utf-8')
+
+
 

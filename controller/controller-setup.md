@@ -18,7 +18,7 @@
 * Install uwsgi uwsgi-plugin-python3
 * Install picocom
 * Install python3-serial
-* Install python3-multipart
+* Install python3-multipart python3-jinja2
 * Install git
 * Set up
 
