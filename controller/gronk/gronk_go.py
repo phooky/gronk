@@ -88,6 +88,8 @@ def file_thread():
         print("got connection")
         try:
             cur_file = c.recv()
+            if c == "":
+                return
             show_ready(cur_file[0])
         except Exception as e:
             print("Exception ",e)
@@ -98,11 +100,9 @@ ft.start()
 def shutdown():
     global full_shutdown
     print("SHUTDOWN NOW")
-    buttons.stop()
     full_shutdown = True
     running.clear()
     # handle shutting down listener thread
-    Client(("localhost", 6543), authkey = b"gronk")
     buttons.evtq.put(('SHUTDOWN',0))
 
 def print_thread(path):
@@ -206,7 +206,7 @@ finally:
     print("connecting to shutdown")
     Client(("localhost", 6543), authkey = b"gronk").send("")
 
-if not full_shutdown:
+if full_shutdown:
     print("Full shutdown")
     show_goodbye()
     time.sleep(2);

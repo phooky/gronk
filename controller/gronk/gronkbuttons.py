@@ -59,3 +59,4 @@ class Buttons:
         
     def stop(self):
         self.running.clear()
+        self.thread.join()
