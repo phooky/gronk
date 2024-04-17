@@ -3,12 +3,24 @@
 import serial
 import time
 import sys
+from threading import Lock,Thread
+from enum import Enum,auto
 
 class GCodeError(Exception):
     pass
 
 class Gronk:
+    class State(Enum):
+        STARTUP = auto()
+        READY = auto()
+        RUNNING = auto()
+        PAUSED = auto()
+        PAUSING = auto()
+
     def __init__(self,port,verbose = False):
+        self.state = Gronk.State.STARTUP
+        self.lock = Lock()
+        self.thread = None
         self.verbose = verbose
         self.s = serial.Serial(port,115200,timeout = 0.25)
         # clear out data
@@ -26,6 +38,7 @@ class Gronk:
         if tries > 3:
             print("Still trying to connect...")
         self.lineno = 0
+        self.state = Gronk.State.READY
 
     def send(self,line):
         self.lineno += 1
@@ -50,14 +63,22 @@ class Gronk:
 
     def wait_until_done(self):
         self.send("M115")
-        
-    def send_file(self,path):
+    
+    def send_file_internal(self,path):
+        with self.lock:
+            self.state = Gronk.State.RUNNING
         self.enable_steppers()
-        f = open(path) if filename != '-' else sys.stdin # need to test
+        f = open(path) if path != '-' else sys.stdin # need to test
         for line in f.readlines():            
             self.send(line)
         self.s.flush()
+        with self.lock:
+            self.state = Gronk.State.READY
 
+    def send_file(self, path):
+        self.thread = Thread(target=self.send_file_internal,args=(path,))
+        self.thread.start()
+        
     def enable_steppers(self,enable=True):
         if enable:
             self.send('M17')

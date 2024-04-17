@@ -7,13 +7,13 @@ from multiprocessing.connection import Client
 
 address = ("localhost", 6543)
 
-def get_status():
+def update_file(file_data):
     with Client(address, authkey = b"gronk") as connection:
-        connection.send("stat_req")
-        response = connection.recv()
-        print(response)    
-        return response
-    return None
+        connection.send(file_data)
+        #response = connection.recv()
+        #print(response)    
+        return True
+    return False
 
 error_templ = """
 <html>
@@ -32,7 +32,6 @@ base_templ = Template(open('templates/base.html.jinja').read())
 def application(environ, start_response):
     curfile = None
     method = environ["REQUEST_METHOD"]
-    get_status()
     def on_field(field):
         pass
     def on_file(file):
@@ -56,6 +55,7 @@ def application(environ, start_response):
                 pass
             else:
                 raise RuntimeError("Unable to process files of type '"+ext+"'. Please make sure your file has a .gcode or .svg extension.")
+            update_file(curfile)
             return base_templ.render(curfile=curfile).encode('utf-8')
         except Exception as e:
             return error_templ.format(files,str(e)).encode('utf-8')
