@@ -10,15 +10,7 @@ class GCodeError(Exception):
     pass
 
 class Gronk:
-    class State(Enum):
-        STARTUP = auto()
-        READY = auto()
-        RUNNING = auto()
-        PAUSED = auto()
-        PAUSING = auto()
-
     def __init__(self,port,verbose = False):
-        self.state = Gronk.State.STARTUP
         self.lock = Lock()
         self.thread = None
         self.verbose = verbose
@@ -38,53 +30,48 @@ class Gronk:
         if tries > 3:
             print("Still trying to connect...")
         self.lineno = 0
-        self.state = Gronk.State.READY
 
     def send(self,line):
         self.lineno += 1
         delay = False
-        while True:
-            data = line.strip().encode('ascii')+b'\n'
-            self.s.write(data)
-            rsp = self.s.readline().strip()
-            if rsp == b'ok':
-                if delay and self.verbose:
-                    print("resent.")
-                return
-            elif rsp == b'full':
-                if not delay and self.verbose:
-                    print("full, trying resend...")
-                delay = True
-                #time.sleep(0.05a)
-            elif rsp[:3] == b'err':
-                raise GCodeError(line + "(" + rsp.decode('utf-8')+")")
-            else:
-                raise Exception("Bad response "+rsp.decode('utf-8')+" (to "+line+")")
+        with self.lock:
+            while True:
+                data = line.strip().encode('ascii')+b'\n'
+                self.s.write(data)
+                rsp = self.s.readline().strip()
+                if rsp == b'ok':
+                    if delay and self.verbose:
+                        print("resent.")
+                    return
+                elif rsp == b'full':
+                    if not delay and self.verbose:
+                        print("full, trying resend...")
+                    delay = True
+                    #time.sleep(0.05a)
+                elif rsp[:3] == b'err':
+                    raise GCodeError(line + "(" + rsp.decode('utf-8')+")")
+                else:
+                    raise Exception("Bad response "+rsp.decode('utf-8')+" (to "+line+")")
 
     def wait_until_done(self):
         self.send("M115")
     
-    def send_file_internal(self,path):
-        with self.lock:
-            self.state = Gronk.State.RUNNING
+    def send_file(self,path):
         self.enable_steppers()
         f = open(path) if path != '-' else sys.stdin # need to test
         for line in f.readlines():            
             self.send(line)
         self.s.flush()
-        with self.lock:
-            self.state = Gronk.State.READY
-
-    def send_file(self, path):
-        self.thread = Thread(target=self.send_file_internal,args=(path,))
-        self.thread.start()
         
     def enable_steppers(self,enable=True):
         if enable:
             self.send('M17')
         else:
             self.send('M18')
-    
+
+    def set_zero(self):
+        self.send('G92')
+
     def jog(self,xdir,ydir):
         self.send(f'G100 X{xdir} Y{ydir}')
 
