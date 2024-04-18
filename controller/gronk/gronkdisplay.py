@@ -70,7 +70,7 @@ class Display:
 
     def show_goodbye(self):
         self.clear()
-        self.text((10,5),'goodbye, gronk.', font=font_logo)
+        self.text((10,5),'goodbye, gronk.', font=self.font_logo)
         self.text((0,40),'Please wait thirty seconds before')
         self.text((0,60),'switching off.')
         self.text((0,80),'Expect to wait about 120 seconds for')
