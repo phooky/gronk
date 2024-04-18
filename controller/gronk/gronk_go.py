@@ -97,6 +97,7 @@ jogs = [0,0]
 def handle_idle(keypress):
     global jogs
     global pendown
+    global shutdown_timer
     (key, down) = keypress
     if key == 'TEST' and down:
         if pendown == None:

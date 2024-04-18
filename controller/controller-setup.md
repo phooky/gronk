@@ -15,12 +15,15 @@
   "RASPBERRY PI OS LITE (32-BIT)"
 * Install python3-pil
 * Install nginx
-* Install uwsgi uwsgi-plugin-python3
+* Install uwsgi uwsgi-plugin-python3 pipx
 * Install picocom
 * Install python3-serial
-* Install python3-multipart python3-jinja2
+* Install python3-multipart python3-jinja2 python3-numpy
 * Install git
 * Set up
 
-pip install --break-system-packages vpype
+```
+sudo apt-get install libopenblas-dev python3-pil nginx uwsgi uwsgi-plugin-python3 pipx picocom python3-serial python3-multipart python3-jinja2 python3-numpy python3-shapely git
 
+pip install vpype vpype-gcode --break-system-packages
+```
