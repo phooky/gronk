@@ -5,8 +5,10 @@ import multiprocessing
 from jinja2 import Template
 from multiprocessing.connection import Client
 import subprocess
-from threading import Thread
+import uwsgi
 
+
+# This is the address of the local gronk interface
 address = ("localhost", 6543)
 
 def update_file(file_data):
@@ -29,28 +31,48 @@ error_templ = """
 </html>
 """
 
-def convert(f):
-    name,svg_path = f
-    gcode_path = "/home/nycr/test.gcode" # svg_path + b".vpype.gcode"
+VPYPE_LOC = os.environ.get('VPYPE_LOC','/home/nycr/.local/bin/vpype')
+GRONK_LOC = os.environ.get('GRONK_LOC','/home/nycr/gronk')
+
+
+def spooler(env):
+    print(" GOT SPOOLER ")
+    print(env)
+    svg_path = env[b'path']
+    gcode_path = "/tmp/newtest.gcode" # svg_path + b".vpype.gcode"
     try:
-        command = ['/home/nycr/.local/bin/vpype', '-c', '/home/nycr/gronk/vpype-gcode.toml', 'read', '--quantization', '0.5mm',
+        command = [VPYPE_LOC, '-c', GRONK_LOC+'/vpype-gcode.toml', 'read', '--quantization', '0.5mm',
                    svg_path.decode(), 'gwrite', gcode_path]
         print("RUNNING VPYPE", command)
-        process = subprocess.run(command, shell=True, close_fds=True)
+        process = subprocess.run(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         print(process)
-        print("FINISHED",name,gcode_path)
-        update_file((name,gcode_path))
-        command = ["/bin/ls", "/tmp", "/notthere"]    
+        print("FINISHED",gcode_path)
+        update_file(("nonsense",gcode_path))
     except Exception as e:
         print("PROBLEM")
         print(e)
     finally:
         print("CONVERT COMPLETE ********************")
+    return uwsgi.SPOOL_OK
     
+uwsgi.spooler = spooler
+
 
 base_templ = Template(open('templates/base.html.jinja').read())
 
 def application(environ, start_response):
+    curfile = None
+    method = environ["REQUEST_METHOD"]
+    print(" got ",method)
+    if method == 'POST':
+        return upload(environ, start_response)
+    else:
+        start_response("200 OK", [("Content-Type", "text/html")])
+        return base_templ.render(curfile=curfile).encode('utf-8')
+
+
+def upload(environ, start_response):
+    print("UPLOAD")
     curfile = None
     method = environ["REQUEST_METHOD"]
     def on_field(field):
@@ -74,16 +96,13 @@ def application(environ, start_response):
             if ext == '.gcode':
                 update_file(curfile)
             elif ext == '.svg':
-                t = Thread(target=convert, args=(curfile,))
-                t.start()
+                gcpath = path + '-convert.gcode'
+                uwsgi.spool({b'path':path,b'outpath':gcpath})
             else:
                 raise RuntimeError("Unable to process files of type '"+ext+"'. Please make sure your file has a .gcode or .svg extension.")
             return base_templ.render(curfile=curfile).encode('utf-8')
         except Exception as e:
-            return error_templ.format(files,str(e)).encode('utf-8')
-    else:
-        start_response("200 OK", [("Content-Type", "text/html")])
-        return base_templ.render(curfile=curfile).encode('utf-8')
+            return error_templ.format(curfile,str(e)).encode('utf-8')
 
 
 

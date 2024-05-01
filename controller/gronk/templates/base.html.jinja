@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- font to HACK 16 -->
+<head>
+  <title>GRONK ONLINE</title>
+  <style>
+    body {
+        color: #ffffff;
+        background-color: #000000;
+        margin: 20px;
+    }
+
+    h1 {
+        padding: 10px 20px;
+        border: solid #ffffff 10px;
+        margin: 20px;
+        display: inline-block;
+    }
+
+    label {
+        background-color: #222222;
+        border: 5px solid #ffffff;
+        padding: 5px 10px;
+        margin: 20px;
+        color: #ffffff;
+        font: inherit;
+        border-radius: 15px;
+        text-align: center;
+    }
+  </style>
+  <script>
+    function do_upload() {
+        const chooser = document.getElementById("file");
+        const form = chooser.form;
+        form.submit()
+    }
+  </script>
+</head>
+<body>
+  <h1>G R O N K.</h1>
+  <div id="explanation">
+    Gronk is NYCR's large-format plotter that can handle materials 1m wide and of any length.
+    You can learn more about Gronk at our <a href="https://wiki.nycresistor.com/wiki/Gronk">wiki</a>,
+    or at its <a href="https://github.com/phooky/gronk">github page</a>.
+  <div id="status">
+    {% block status %}{% endblock %}</div>
+  Cur file is {{ curfile }}
+  <div id="upload">
+    <h3>Upload an SVG or GCODE file.</h3>
+    <p>The version of GCode that Gronk supports is documented in
+      <a href="https://github.com/phooky/gronk/blob/main/README.md">the README file</a>.</p>
+    <form method="post" enctype="multipart/form-data">
+      <input id="file" name="file" onchange="do_upload();" type="file" hidden />
+      <label onclick="document.getElementById('file').click();">Upload SVG or GCODE file</label>
+    </form>
+  </div>
+</body>
+</html>
