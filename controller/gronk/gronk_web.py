@@ -36,8 +36,6 @@ GRONK_LOC = os.environ.get('GRONK_LOC','/home/nycr/gronk')
 
 
 def spooler(env):
-    print(" GOT SPOOLER ")
-    print(env)
     svg_path = env[b'path']
     gcode_path = "/tmp/newtest.gcode" # svg_path + b".vpype.gcode"
     try:
@@ -60,21 +58,23 @@ uwsgi.spooler = spooler
 
 base_templ = Template(open('templates/base.html.jinja').read())
 
+def build_page(curfile=None,spoolfile=None):
+    return base_templ.render(curfile=curfile,spoolfile=spoolfile).encode('utf-8')
+    
+
 def application(environ, start_response):
-    curfile = None
     method = environ["REQUEST_METHOD"]
     print(" got ",method)
+    start_response("200 OK", [("Content-Type", "text/html")])
     if method == 'POST':
         return upload(environ, start_response)
     else:
-        start_response("200 OK", [("Content-Type", "text/html")])
-        return base_templ.render(curfile=curfile).encode('utf-8')
-
+        if environ['check']:
+            print("CHECKING")
+        return build_page(curfile=None)
 
 def upload(environ, start_response):
-    print("UPLOAD")
     curfile = None
-    method = environ["REQUEST_METHOD"]
     def on_field(field):
         pass
     def on_file(file):
@@ -83,26 +83,25 @@ def upload(environ, start_response):
         (_, name) = os.path.split(file.file_name.decode())
         file.flush_to_disk()
         curfile = (name,file.actual_file_name)
-    if method == 'POST':
-        start_response("200 OK", [("Content-Type", "text/html")])
-        multipart_headers = {'Content-Type': environ['CONTENT_TYPE']}
-        multipart_headers['Content-Length'] = environ['CONTENT_LENGTH']
-        try:
-            multipart.parse_form(multipart_headers, environ['wsgi.input'], on_field, on_file)
-            name = curfile[0]
-            path = curfile[1]
-            (_, ext) = os.path.splitext(name)
-            ext = ext.lower()
-            if ext == '.gcode':
-                update_file(curfile)
-            elif ext == '.svg':
-                gcpath = path + '-convert.gcode'
-                uwsgi.spool({b'path':path,b'outpath':gcpath})
-            else:
-                raise RuntimeError("Unable to process files of type '"+ext+"'. Please make sure your file has a .gcode or .svg extension.")
-            return base_templ.render(curfile=curfile).encode('utf-8')
-        except Exception as e:
-            return error_templ.format(curfile,str(e)).encode('utf-8')
+    multipart_headers = {'Content-Type': environ['CONTENT_TYPE']}
+    multipart_headers['Content-Length'] = environ['CONTENT_LENGTH']
+    try:
+        spoolfile = None
+        multipart.parse_form(multipart_headers, environ['wsgi.input'], on_field, on_file)
+        name = curfile[0]
+        path = curfile[1]
+        (_, ext) = os.path.splitext(name)
+        ext = ext.lower()
+        if ext == '.gcode':
+            update_file(curfile)
+        elif ext == '.svg':
+            gcpath = path + b'-convert.gcode'
+            spoolfile = uwsgi.spool({b'path':path,b'outpath':gcpath})
+        else:
+            raise RuntimeError("Unable to process files of type '"+ext+"'. Please make sure your file has a .gcode or .svg extension.")
+        return build_page(curfile=curfile,spoolfile=spoolfile)
+    except Exception as e:
+        return error_templ.format(curfile,str(e)).encode('utf-8')
 
 
 

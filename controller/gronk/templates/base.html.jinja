@@ -34,6 +34,12 @@
         const form = chooser.form;
         form.submit()
     }
+
+    function check_done() {
+        setTimeout( check_done, 3000 );
+    }
+    
+    if ( {{ spoolpath }} ) check_done();
   </script>
 </head>
 <body>
@@ -44,7 +50,7 @@
     or at its <a href="https://github.com/phooky/gronk">github page</a>.
   <div id="status">
     {% block status %}{% endblock %}</div>
-  Cur file is {{ curfile }}
+  Cur file is {{ curfile }} spool file is {{ spoolfile }}
   <div id="upload">
     <h3>Upload an SVG or GCODE file.</h3>
     <p>The version of GCode that Gronk supports is documented in
