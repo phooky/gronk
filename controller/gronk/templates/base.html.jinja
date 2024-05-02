@@ -32,14 +32,9 @@
     function do_upload() {
         const chooser = document.getElementById("file");
         const form = chooser.form;
-        form.submit()
+        form.submit();
     }
 
-    function check_done() {
-        setTimeout( check_done, 3000 );
-    }
-    
-    if ( {{ spoolpath }} ) check_done();
   </script>
 </head>
 <body>

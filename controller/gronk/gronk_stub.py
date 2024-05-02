@@ -11,7 +11,9 @@ while True:
     try:
         r = c.recv()
         print("RECEIVED:",r)
-        if r == "stat_req":
+        if r == "Q": # query current file
+            c.send(("name","path"))
+        elif r == "stat_req":
             c.send({"okay":"doing fine"})
     except Exception as e:
         print("Exception ",e)

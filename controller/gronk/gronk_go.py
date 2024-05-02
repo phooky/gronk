@@ -47,12 +47,14 @@ def file_thread():
     listener = Listener(address, authkey = b"gronk")
     while running.is_set():
         c = listener.accept()
-        print("got connection")
         try:
             cur_file = c.recv()
             if c == "":
                 return
-            display.show_ready(cur_file[0])
+            elif c == "Q":
+                c.send(cur_file)
+            else:
+                display.show_ready(cur_file[0])
         except Exception as e:
             print("Exception ",e)
 
