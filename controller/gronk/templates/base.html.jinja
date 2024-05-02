@@ -27,12 +27,52 @@
         border-radius: 15px;
         text-align: center;
     }
+
+    table {
+        border-collapse: collapse;
+        border: 2px solid white;
+        margin: 10px 20px;
+    }
+
+    th,td {
+        padding: 5px 20px;
+    }
+    th {
+        background-color: #222222;
+        font-weight: bolder;
+    }
+    tr {
+        border: 2px solid white;
+    }
+    tr.selected {
+        background-color: #666666;
+    }
+    
   </style>
   <script>
     function do_upload() {
         const chooser = document.getElementById("file");
         const form = chooser.form;
         form.submit();
+    }
+
+    var selected = {{ selected_idx }};
+    
+    function select_plot(e) {
+        idx = e.target.parentNode.rowIndex - 1;
+        if (idx < 0) { return; }
+        if (selected >= 0) {
+            document.getElementById("plots").rows[selected+1].className = '';            
+        }
+        var n = e.target.parentNode;
+        n.className = 'selected';
+        selected = idx;
+        var loc = location.href;
+        if (loc.indexOf("?") != -1) {
+            loc = loc.substring(0,loc.indexOf("?"));
+        }
+        loc += "?SET="+n.dataset.name;
+        fetch(loc);
     }
 
   </script>
@@ -43,9 +83,17 @@
     Gronk is NYCR's large-format plotter that can handle materials 1m wide and of any length.
     You can learn more about Gronk at our <a href="https://wiki.nycresistor.com/wiki/Gronk">wiki</a>,
     or at its <a href="https://github.com/phooky/gronk">github page</a>.
+  </div>
   <div id="status">
-    {% block status %}{% endblock %}</div>
-  Cur file is {{ curfile }} spool file is {{ spoolfile }}
+    <table id="plots" onclick="select_plot(event);">
+      <tr><th>Plot name</th><th>Date uploaded</th></tr>
+    {% for plot in plots %}
+    <tr {% if curfile == plot[0] %}class="selected"{% endif %} data-name="{{ plot[0] }}"><td>{{ plot[0] }}</td><td>{{ plot[1] }}</td></tr>
+    {% endfor %}
+    </table>
+    After selecting the plot you'd like to run, walk over to the plotter and press the OK button.
+  </div>
+
   <div id="upload">
     <h3>Upload an SVG or GCODE file.</h3>
     <p>The version of GCode that Gronk supports is documented in

@@ -27,9 +27,8 @@ def query_gronk_file():
         connection.send("Q")
         response = connection.recv()
         print("Response to query",response)
-        return True
-    return False
-
+        return response[0]
+    return None
 
 VPYPE_LOC = os.environ.get('VPYPE_LOC','/home/nycr/.local/bin/vpype')
 GRONK_LOC = os.environ.get('GRONK_LOC','/home/nycr/gronk')
@@ -58,7 +57,7 @@ def spooler(env):
         process = subprocess.run(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         print(process)
         print("FINISHED",gcode_path)
-        update_file(install_gcode(name,gcode_path))
+        update_gronk_file(install_gcode(name,gcode_path))
     except Exception as e:
         print("PROBLEM")
         print(e)
@@ -68,13 +67,34 @@ def spooler(env):
     
 uwsgi.spooler = spooler
 
-
+# Jinja templates for the base page and the error page.
 base_templ = Template(open('templates/base.html.jinja').read())
 error_templ = Template(open('templates/error.html.jinja').read())
 
+from datetime import datetime
+
+def list_plots():
+    plots = list(os.scandir(GRONK_PLOTS_LOC))
+    plots.sort(key=lambda x:x.stat().st_mtime)
+    def mktup(x):
+        dt = datetime.fromtimestamp(x.stat().st_mtime)
+        return (x.name,dt.strftime("%B %d, %Y %I:%M:%S"))
+    return list(map(mktup, plots))
+
 def build_page(curfile=None,spoolfile=None):
-    return base_templ.render(curfile=curfile,spoolfile=spoolfile).encode('utf-8')
+    if not curfile:
+        curfile = query_gronk_file()
+    plots = list_plots()
+    selected_idx = -1
+    for i,p in enumerate(plots):
+        if p[0] == curfile:
+            selected_idx = i
+    return base_templ.render(curfile=curfile,
+                             selected_idx=selected_idx,
+                             plots=plots,spoolfile=spoolfile).encode('utf-8')
     
+
+from urllib.parse import parse_qsl
 
 def application(environ, start_response):
     method = environ["REQUEST_METHOD"]
@@ -83,7 +103,13 @@ def application(environ, start_response):
     if method == 'POST':
         return upload(environ, start_response)
     else:
-        return build_page(curfile=None)
+        qs = dict(parse_qsl(environ["QUERY_STRING"]))
+        print("updating, qs ",qs)
+        if "SET" in qs:
+            n = qs["SET"]
+            update_gronk_file((n, os.path.join(GRONK_PLOTS_LOC,n)))
+            return None
+        return build_page()
 
 def upload(environ, start_response):
     curfile = None
@@ -105,7 +131,7 @@ def upload(environ, start_response):
         (basename, ext) = os.path.splitext(name)
         ext = ext.lower()
         if ext == '.gcode':
-            update_file(curfile)
+            update_gronk_file(curfile)
         elif ext == '.svg':
             gcpath = path + '-convert.gcode'
             spoolfile = uwsgi.spool({b'path':path.encode('utf-8'),
